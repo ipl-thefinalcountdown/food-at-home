@@ -36,7 +36,29 @@ image: docker/compose:latest
 services:
   - docker:dind
 
+stages:
+  - check
+  - build
+  - test
+  - production
+  - deploy
+
+include:
+  - template: License-Management.gitlab-ci.yml
+
+editorconfig:
+  stage: check
+  image: node:latest
+  cache:
+    paths:
+      - node_modules/
+  script:
+    - npm install eclint
+    - npx eclint check "{,**/}{,Dockerfile,*.{,yml,php}}"
+  allow_failure: true
+
 build:
+  stage: build
   except:
     refs:
      - master
@@ -44,6 +66,7 @@ build:
     - docker-compose build --parallel
 
 deploy:
+  stage: deploy
   only:
     refs:
       - master
