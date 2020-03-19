@@ -61,7 +61,7 @@ build:
   stage: build
   except:
     refs:
-     - master
+      - master
   script:
     - docker-compose build --parallel
 
