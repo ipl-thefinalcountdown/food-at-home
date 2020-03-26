@@ -43,20 +43,24 @@ services:
       - ./webapp/:/var/www/html/:ro
       - ./config/contrib/nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
     links:
-      - php
+      - "php-fpm:php-fpm.docker.local"
     depends_on:
+      - php-fpm
       - database
-  php:
+  php-fpm:
     restart: always
     image: aurorafossorg/php-fpm:latest
     build: ./config/docker/context/php-fpm
     volumes:
-      - ./webapp/:/var/www/html/:ro
+      - ./webapp/:/var/www/html/
+    links:
+      - "database:db.docker.local"
+    depends_on:
+      - database
+    user: ${CURRENT_UID}
   database:
     image: mariadb:10.4
     restart: always
-    ports:
-      - "9906:3306"
     volumes:
       - .php-devenv/database:/var/lib/mysql
     environment:
@@ -66,8 +70,10 @@ services:
       MYSQL_PASSWORD: db_user
   adminer:
     image: adminer
-    depends_on:
-      - database
     restart: always
+    links:
+      - "database:db.docker.local"
     ports:
       - "10000:8080"
+    depends_on:
+      - database
