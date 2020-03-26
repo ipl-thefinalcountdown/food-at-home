@@ -35,7 +35,62 @@ FROM php:7.4-fpm-alpine
 LABEL maintainer="Aurora Free Open Source Software <contact at aurorafoss.org>"
 
 # Add xdebug php extension
-RUN apk --update --no-cache --virtual .build-deps add $PHPIZE_DEPS \
-	&& pecl install xdebug-2.8.1 \
-	&& docker-php-ext-enable xdebug \
-	&& apk del -f .build-deps
+
+# Add required depeendencies for running
+RUN apk --update --no-cache add \
+		freetype \
+		libpng \
+		libjpeg-turbo \
+		libzip \
+		oniguruma \
+		libxml2 \
+		openssl-dev \
+		libmcrypt \
+		composer
+
+# Add required dependencies for building
+RUN apk --update --no-cache --virtual .build-deps add \
+		$PHPIZE_DEPS \
+		freetype-dev \
+		libjpeg-turbo-dev \
+		libmcrypt-dev \
+		libpng-dev \
+		libzip-dev \
+		oniguruma-dev \
+		libxml2-dev
+
+# Install pecl extensions and enable it
+RUN pecl install \
+		mcrypt-1.0.3 \
+		xdebug-2.8.1 \
+	&& docker-php-ext-enable \
+		xdebug \
+		mcrypt
+
+# Configure php extensions
+RUN docker-php-ext-configure gd \
+		--with-freetype=/usr/include \
+		--with-jpeg=/usr/include
+
+# Install php docker extensions
+RUN docker-php-ext-install -j$(nproc) \
+		iconv \
+		bcmath \
+		pdo \
+		pdo_mysql \
+		mysqli \
+		opcache \
+		zip \
+		mbstring \
+		soap \
+		ctype \
+		tokenizer \
+		xml \
+		json \
+		gd
+
+# Delete build dependencies
+RUN apk del -f .build-deps
+
+# Delete cache
+RUN rm -rf /tmp/* /var/cache/apk/*
