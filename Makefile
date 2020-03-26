@@ -47,6 +47,13 @@ down:
 	@echo "--> Stop docker environment..."
 	@export CURRENT_UID=$(shell stat -c "%u:%g" ./webapp/); docker-compose down $(DOCKER_OPTIONS)
 
+restart:
+	@echo "--> Restarting docker environment..."
+	@export CURRENT_UID=$(shell stat -c "%u:%g" ./webapp/); docker-compose restart $(DOCKER_OPTIONS)
+
+logging:
+	@docker-compose logs -f
+
 build:
 	@echo "--> Building dockers in parallel..."
 	@docker-compose build --parallel
