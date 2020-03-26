@@ -45,7 +45,7 @@ up:
 
 down:
 	@echo "--> Stop docker environment..."
-	@docker-compose down
+	@export CURRENT_UID=$(shell stat -c "%u:%g" ./webapp/); docker-compose down $(DOCKER_OPTIONS)
 
 build:
 	@echo "--> Building dockers in parallel..."
