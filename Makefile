@@ -34,9 +34,18 @@
 
 all: up
 
+start: DOCKER_OPTIONS=--detach
+start: up
+
+stop: down
+
 up:
 	@echo "--> Starting docker environment..."
-	@docker-compose up
+	@export CURRENT_UID=$(shell stat -c "%u:%g" ./webapp/); docker-compose up $(DOCKER_OPTIONS)
+
+down:
+	@echo "--> Stop docker environment..."
+	@docker-compose down
 
 build:
 	@echo "--> Building dockers in parallel..."
