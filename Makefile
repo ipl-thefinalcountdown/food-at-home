@@ -58,6 +58,9 @@ build:
 	@echo "--> Building dockers in parallel..."
 	@docker-compose build --parallel
 
+status:
+	@docker-compose ps --all
+
 clean:
 	@echo "--> Removing database files..."
 	@rm -rf .php-devenv/
