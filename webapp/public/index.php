@@ -1,39 +1,55 @@
 <?php
 
-/*
- *                                     __
- *                                    / _|
- *   __ _ _   _ _ __ ___  _ __ __ _  | |_ ___  ___ ___
- *  / _` | | | | '__/ _ \| '__/ _` | |  _/ _ \/ __/ __|
- * | (_| | |_| | | | (_) | | | (_| | | || (_) \__ \__ \
- *  \__,_|\__,_|_|  \___/|_|  \__,_| |_| \___/|___/___/
- *
- * Copyright (C) 2020 Aurora Free Open Source Software.
- * Copyright (C) 2020 Luís Ferreira <luis@aurorafoss.org>
- *
- * This file is part of the Aurora Free Open Source Software. This
- * organization promote free and open source software that you can
- * redistribute and/or modify under the terms of the Boost Software License
- * Version 1.0 available in the package root path as 'LICENSE' file. Please
- * review the following information to ensure that the license requirements
- * meet the opensource guidelines at opensource.org .
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
- * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- *
- * NOTE: All products, services or anything associated to trademarks and
- * service marks used or referenced on this file are the property of their
- * respective companies/owners or its subsidiaries. Other names and brands
- * may be claimed as the property of others.
- *
- * For more info about intellectual property visit: aurorafoss.org or
- * directly send an email to: contact (at) aurorafoss.org .
- */
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-phpinfo();
-?>
+define('LARAVEL_START', microtime(true));
+
+/*
+|--------------------------------------------------------------------------
+| Check If Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is maintenance / demo mode via the "down" command we
+| will require this file so that any prerendered template can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
+
+if (file_exists(__DIR__.'/../storage/framework/maintenance.php')) {
+    require __DIR__.'/../storage/framework/maintenance.php';
+}
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
+
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$kernel = $app->make(Kernel::class);
+
+$response = tap($kernel->handle(
+    $request = Request::capture()
+))->send();
+
+$kernel->terminate($request, $response);
