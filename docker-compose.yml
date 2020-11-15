@@ -36,7 +36,7 @@ version: "3.7"
 services:
   web:
     image: nginx:1.17-alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:80"
     volumes:
@@ -49,7 +49,7 @@ services:
       - php-fpm
       - database
   php-fpm:
-    restart: always
+    restart: unless-stopped
     image: aurorafossorg/php-fpm:latest
     build: ./config/docker/context/php-fpm
     volumes:
@@ -61,7 +61,7 @@ services:
     user: ${CURRENT_UID}
   database:
     image: mariadb:10.4
-    restart: always
+    restart: unless-stopped
     volumes:
       - .php-devenv/database:/var/lib/mysql
     environment:
@@ -71,7 +71,7 @@ services:
       MYSQL_PASSWORD: db_user
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     links:
       - "database:db.docker.local"
     ports:
