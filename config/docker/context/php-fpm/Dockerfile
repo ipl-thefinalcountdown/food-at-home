@@ -46,7 +46,8 @@ RUN apk --update --no-cache add \
 		libxml2 \
 		openssl-dev \
 		libmcrypt \
-		composer
+		composer \
+		npm
 
 # Add required dependencies for building
 RUN apk --update --no-cache --virtual .build-deps add \
