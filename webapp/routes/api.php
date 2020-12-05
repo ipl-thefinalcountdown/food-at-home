@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/login', 'Auth\AuthController@login')->name('login');
+Route::get('/products', 'ProductController@index')->name('products');
+Route::get('/products/{product}', 'ProductController@view')->name('product');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', 'UserController@index');
