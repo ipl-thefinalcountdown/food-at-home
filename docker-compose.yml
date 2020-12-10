@@ -45,9 +45,18 @@ services:
       - ./config/contrib/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     links:
       - "php-fpm:php-fpm.docker.local"
+      - "websocket:websocket.docker.local"
     depends_on:
       - php-fpm
       - database
+      - websocket
+  websocket:
+    build: ./config/docker/context/node
+    restart: unless-stopped
+    user: ${CURRENT_UID}
+    working_dir: /home/node/app
+    volumes:
+      - ./websockets/:/home/node/app
   php-fpm:
     restart: unless-stopped
     image: aurorafossorg/php-fpm:latest
