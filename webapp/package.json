@@ -14,6 +14,7 @@
         "@types/bootstrap": "^5.0.0",
         "@types/jquery": "^3.5.4",
         "@types/lodash": "^4.14.165",
+        "@types/socket.io-client": "^1.4.34",
         "axios": "^0.19",
         "bootstrap": "^4.0.0",
         "bootstrap-vue": "^2.19.0",
@@ -31,6 +32,7 @@
         "vue-class-component": "^7.2.6",
         "vue-property-decorator": "^9.0.2",
         "vue-router": "^3.4.9",
+        "vue-socket.io": "^3.0.10",
         "vue-template-compiler": "^2.6.12",
         "vuex": "^3.6.0",
         "vuex-rest-api": "^2.13.0"

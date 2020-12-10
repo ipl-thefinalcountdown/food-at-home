@@ -4,6 +4,16 @@ import './bootstrap'
 
 import Vue from 'vue';
 
+import VueSocketIO from "vue-socket.io"
+import SocketIOClient from "socket.io-client"
+
+Vue.use(
+	new VueSocketIO({
+		debug: true,
+		connection: SocketIOClient('/', { path: '/ws/' })
+	})
+)
+
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue)
 
