@@ -27,7 +27,6 @@
         :items="items"
         :fields="tableFields()"
         :per-page="perPage"
-        :current-page="currentPage"
         @row-clicked="rowClicked"
         :no-select-on-click="true"
         :busy="awaitingSearch"
@@ -82,10 +81,11 @@
       <!-- Pagination -->
       <b-pagination
         v-model="currentPage"
-        :total-rows="rows"
+        :total-rows="metaTotal"
         :per-page="perPage"
         aria-controls="my-table"
         align="center"
+        @change="pageChanged"
       />
     </div>
   </div>
@@ -111,7 +111,11 @@ export default Vue.extend({
     /// callback when row delete button is clicked
     deleteClicked: Function,
     // boolean for defining header action label
-    noActionLabel: Boolean
+    noActionLabel: Boolean,
+
+    pageChanged: Function,
+
+    metaTotal: [Number, String],
   },
   data() {
     let obj = this;
@@ -121,7 +125,9 @@ export default Vue.extend({
       /// current table page
       currentPage: <number>1,
       /// number of rows per page
-      perPage: <number>10,
+      perPage: <number>15,
+
+      lastPage: <number | string | undefined>undefined,
 
       // == table configurations == //
       headVariant: 'dark',

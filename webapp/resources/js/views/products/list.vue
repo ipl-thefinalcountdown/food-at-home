@@ -6,6 +6,8 @@
           :items="items"
           :row-clicked="rowClicked"
           :filter-changed="filterChanged"
+          :page-changed="pageChanged"
+          :meta-total="total"
         />
       </div>
     </div>
@@ -44,6 +46,9 @@ import { AxiosPromise } from "axios";
           };
         });
       },
+
+      total: (state: any) => state.api.products.meta == undefined ? 0 : state.api.products.meta.total,
+
       pending: (state: any) => state.api.pending,
       error: (state: any) => state.api.error,
     }),
@@ -56,6 +61,7 @@ export default class ProductListView extends Vue {
   getProducts!: (obj: Params) => void;
 
   filterText?: string = "";
+  currentPage?: number | string;
 
   data() {
     let obj = this;
@@ -71,6 +77,11 @@ export default class ProductListView extends Vue {
         obj.getProducts({ params: { name: text } });
         obj.filterText = text;
       },
+
+      pageChanged(page: string) {
+          obj.currentPage = page;
+          obj.getProducts({ params: { name: obj.filterText, page: page } });
+      }
     };
   }
 
