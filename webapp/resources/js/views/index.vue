@@ -1,5 +1,9 @@
 <template>
-    <page-component />
+    <page-component>
+        <b-container>
+            <b-img center fluid src="/img/foodhome.png" alt="Center image"></b-img>
+        </b-container>
+    </page-component>
 </template>
 
 <script lang="ts">
