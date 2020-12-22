@@ -13,7 +13,8 @@ export interface ParamsOptions {
 	id?: number | string,
 	filter?: string,
 	name?: string,
-	type?: string
+    type?: string,
+    page?: number | string,
 }
 
 export interface LaravelResponse<T> {
@@ -31,7 +32,7 @@ const api : Store = new Vapi({
 		action: "getProducts",
 		property: "products",
 		path: (opt: ParamsOptions) => {
-			let ret = `/products/?name=${opt.name}`;
+			let ret = `/products/?name=${opt.name}&page=${opt.page}`;
 			if (opt.type !== undefined)
 				ret.concat(`&type=${<ProductType>opt.type}`)
 
