@@ -26,11 +26,16 @@ const api : Store = new Vapi({
 	baseURL: `/api/`,
 	state: {
 		products: <LaravelResponse<Array<ProductModel>>>{data:[]},
-		product: <LaravelResponse<ProductModel>>{},
+		product: <LaravelResponse<ProductModel>>{data:{}},
 
 		profile: <UserModel>{},
 	}
 })
+	.get({
+		action: "getProduct",
+		property: "product",
+		path: (opt: ParamsOptions) => `/products/${opt.id}`
+	})
 	.get({
 		action: "getProducts",
 		property: "products",

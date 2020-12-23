@@ -5,6 +5,7 @@ import VueRouter from "vue-router"
 
 import IndexView from "./views/index.vue"
 import ProductListView from "./views/products/list.vue"
+import ProductView from "./views/products/view.vue"
 import LoginView from './views/auth/login.vue'
 import RegisterView from './views/auth/register.vue'
 import ProfileView from './views/auth/profile.vue'
@@ -36,6 +37,7 @@ export default new VueRouter({
 	routes: [
 		{ path: '/', name: 'index', component: IndexView },
 		{ path: '/products', name: 'list-products', component: ProductListView },
+		{ path: '/products/:id', name: 'view-product', component: ProductView },
 
 		{ path: '/login', name: 'login', component: LoginView, beforeEnter: ifNotAuthenticated },
 		{ path: '/register', name: 'register', component: RegisterView, beforeEnter: ifNotAuthenticated },
