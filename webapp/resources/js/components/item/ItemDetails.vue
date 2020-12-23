@@ -20,6 +20,10 @@
         </div>
       </template>
 
+      <template v-for="slotName in Object.keys($scopedSlots)" v-slot:[slotName]="slotScope">
+        <slot :name="slotName" v-bind="slotScope"></slot>
+      </template>
+
       <caption>Item details:</caption>
     </b-table>
   </div>
