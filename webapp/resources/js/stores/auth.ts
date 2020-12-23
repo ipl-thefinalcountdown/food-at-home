@@ -66,10 +66,15 @@ export class Auth extends VuexModule {
 	public makeAuthLogout(): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.context.commit('setAuthLogout')
+
+			//query logout
+			axios({ url: 'logout', method: 'POST' }).then(() => {
+				// remove the axios default header
+				delete axios.defaults.headers.common['Authorization']
+			})
+
 			localStorage.removeItem('user-token')
 			localStorage.removeItem('user-data')
-			// remove the axios default header
-			delete axios.defaults.headers.common['Authorization']
 			resolve()
 		})
 	}
