@@ -12,7 +12,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('products');
+        $query = DB::table('products')->where('deleted_at', null);
 
         // filter by type
         if($request->has('type'))
