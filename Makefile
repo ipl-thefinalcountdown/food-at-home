@@ -62,6 +62,18 @@ watch-frontend:
 	@echo "Watching frontend webpack resources..."
 	@sh -c "(cd webapp; npm run watch)"
 
+install-all:
+	make install-bootstrap-webapp
+	make install-websockets
+
+install-bootstrap-webapp:
+	@echo "Installing webapp dependencies..."
+	@cd webapp; npm install
+
+install-websockets:
+	@echo "Installing websockets dependencies..."
+	@cd websockets; npm install
+
 status:
 	@docker-compose ps --all
 
