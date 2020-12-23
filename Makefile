@@ -52,11 +52,15 @@ restart:
 	@export CURRENT_UID=$(shell stat -c "%u:%g" ./webapp/); docker-compose restart $(DOCKER_OPTIONS)
 
 logging:
-	@docker-compose logs -f
+	@docker-compose logs -f --tail=1000
 
 build:
 	@echo "--> Building dockers in parallel..."
 	@docker-compose build --parallel
+
+watch-frontend:
+	@echo "Watching frontend webpack resources..."
+	@sh -c "(cd webapp; npm run watch)"
 
 status:
 	@docker-compose ps --all
