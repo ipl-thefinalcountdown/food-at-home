@@ -46,7 +46,11 @@ const api : Store = new Vapi({
 
 			return ret;
 		}
-	})
+    })
+    .delete({
+        action: "deleteProduct",
+        path: (opt: ParamsOptions) => `/products/${opt.id}`
+    })
 	.get({
 		action: "getProfile",
 		property: "profile",
