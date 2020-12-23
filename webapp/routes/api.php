@@ -23,6 +23,8 @@ Route::middleware('guest')->group(function() {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::delete('/products/{product}', 'ProductController@delete')->name('delete-product');
+
     Route::get('/user', 'UserController@index');
 
     Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
