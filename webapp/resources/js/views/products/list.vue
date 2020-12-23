@@ -8,6 +8,9 @@
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
+          :add-clicked="addClicked"
+          :edit-clicked="editClicked"
+          :delete-clicked="deleteClicked"
         />
       </div>
     </div>
@@ -73,6 +76,7 @@ export default class ProductListView extends Vue {
           params: { id: String(record?.id) },
         });
       },
+
       filterChanged(text: string) {
         obj.getProducts({ params: { name: text } });
         obj.filterText = text;
@@ -81,6 +85,24 @@ export default class ProductListView extends Vue {
       pageChanged(page: string) {
           obj.currentPage = page;
           obj.getProducts({ params: { name: obj.filterText, page: page } });
+      },
+
+      addClicked(event: Event) {
+          router.push({
+              name: "new-product"
+          });
+      },
+
+      editClicked(product: ProductModel, index: number, event: Event) {
+          router.push({
+              name: "edit-product"
+          });
+      },
+
+      deleteClicked(product: ProductModel, index: number, event: Event) {
+          router.push({
+              name: "delete-product"
+          });
       }
     };
   }
