@@ -3,6 +3,7 @@
 import Vapi from "vuex-rest-api"
 import { Store } from "vuex-rest-api/dist/Store"
 import {ProductModel, ProductType} from "../models/product"
+import { UserModel } from "../models/user";
 
 export interface Params {
 	params?: ParamsOptions
@@ -26,6 +27,8 @@ const api : Store = new Vapi({
 	state: {
 		products: <LaravelResponse<Array<ProductModel>>>{data:[]},
 		product: <LaravelResponse<ProductModel>>{},
+
+		profile: <UserModel>{},
 	}
 })
 	.get({
@@ -38,6 +41,15 @@ const api : Store = new Vapi({
 
 			return ret;
 		}
+	})
+	.get({
+		action: "getProfile",
+		property: "profile",
+		path: (opt: ParamsOptions) => `/user`
+	})
+	.post({
+		action: "registerUser",
+		path: (opt: ParamsOptions) => `/register`
 	})
 	.getStore();
 

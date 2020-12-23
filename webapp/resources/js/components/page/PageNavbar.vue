@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar toggleable="lg" variant="light">
-      <b-navbar-brand to="/">Food@Home</b-navbar-brand>
+      <b-navbar-brand to="/">Chantilly</b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -12,20 +12,45 @@
 
         <!-- Right aligned nav items -->
         <b-navbar-nav class="ml-auto">
-          <b-nav-form @submit.prevent="$router.push({name: 'login'})">
-            <b-button size="sm" class="my-2 my-sm-0" type="submit">Login</b-button>
+          <b-nav-form v-if="!isAuthenticated">
+            <b-button size="sm" class="my-2 my-sm-0" :to="{name: 'login'}">Login</b-button>
           </b-nav-form>
-
-          <b-nav-item-dropdown right>
+          <b-nav-item-dropdown v-else right>
             <!-- Using 'button-content' slot -->
             <template #button-content>
-              <em>User</em>
+              <em>{{ authUser.email }}</em>
             </template>
-            <b-dropdown-item href="#">Profile</b-dropdown-item>
-            <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+            <b-dropdown-item :to="{name: 'view-profile'}">Profile</b-dropdown-item>
+            <b-dropdown-item @click.prevent="handleLogout()">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
   </div>
 </template>
+
+<script lang="ts">
+import Vue from "vue"
+	import Component from "vue-class-component"
+  import { namespace } from "vuex-class";
+	const Auth = namespace("auth");
+	import { UserAuthModel } from '../../models/auth'
+import router from "../../router";
+import { UserModel } from "../../models/user";
+	@Component({
+		components: {}
+  })
+  export default class LoginView extends Vue {
+		@Auth.Getter
+    private isAuthenticated!: boolean;
+
+    @Auth.Getter
+    public authUser!: UserModel;
+
+		@Auth.Action
+    private makeAuthLogout!: () => Promise<void>;
+		handleLogout() {
+      this.makeAuthLogout().then(() => router.push('/login'))
+		}
+	}
+</script>
