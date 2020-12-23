@@ -57,11 +57,12 @@ import { AxiosPromise } from "axios";
     }),
   },
   methods: {
-    ...mapActions(["getProducts"]),
+    ...mapActions(["getProducts", "deleteProduct"]),
   },
 })
 export default class ProductListView extends Vue {
   getProducts!: (obj: Params) => void;
+  deleteProduct!: (obj: Params) => AxiosPromise;
 
   filterText?: string = "";
   currentPage?: number | string;
@@ -100,9 +101,14 @@ export default class ProductListView extends Vue {
       },
 
       deleteClicked(product: ProductModel, index: number, event: Event) {
-          router.push({
-              name: "delete-product"
-          });
+          obj
+            .deleteProduct({ params: { id: product.id } })
+            .then(() => {
+                createAlert(AlertType.Success, `Product "${product.name}" deleted successfuly!`);
+                (<ProductModel[]> obj.$store.state.api.products.data).splice(index, 1);
+            }).catch((err) => {
+                createAlert(AlertType.Danger, `Could not delete product "${product.name}": ${err}`)
+            });
       }
     };
   }
