@@ -15,3 +15,5 @@ yarn-error.log
 /public/mix-manifest.json
 /public/dist/
 /public/fonts/
+
+dist/
