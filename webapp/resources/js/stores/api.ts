@@ -14,8 +14,8 @@ export interface ParamsOptions {
 	id?: number | string,
 	filter?: string,
 	name?: string,
-    type?: string,
-    page?: number | string,
+	type?: string,
+	page?: number | string,
 }
 
 export interface LaravelResponse<T> {
@@ -46,11 +46,16 @@ const api : Store = new Vapi({
 
 			return ret;
 		}
-    })
-    .delete({
-        action: "deleteProduct",
-        path: (opt: ParamsOptions) => `/products/${opt.id}`
-    })
+	})
+	.delete({
+		action: "deleteProduct",
+		path: (opt: ParamsOptions) => `/products/${opt.id}`
+	})
+	.put({
+		action: "putProduct",
+		property: "product",
+		path: (opt: ParamsOptions) => `/products/${opt.id}`
+	})
 	.get({
 		action: "getProfile",
 		property: "profile",
