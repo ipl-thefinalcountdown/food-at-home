@@ -11,7 +11,7 @@ import { ModelSelect } from 'vue-search-select';
 
 export default Vue.extend({
 	 props: {
-	  value: Number,
+	  value: [Number, String],
       label: String,
       description: String,
 	  placeholder: String,
