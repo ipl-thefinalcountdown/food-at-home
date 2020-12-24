@@ -8,6 +8,24 @@
                 <b-form-group label="Description">
                     <b-form-textarea id="Description" placeholder="Insert description" v-model="form.description" rows="3" max-rows="6" />
                 </b-form-group>
+                <b-form-group id="fieldset-1" label="Choose an image">
+                    <b-form-file v-if="isEdit"
+                        v-model="image"
+                        placeholder="Choose an image or drop it here..."
+                        drop-placeholder="Drop image here..."
+                    ></b-form-file>
+                    <b-form-file v-else
+                        required
+                        v-model="image"
+                        placeholder="Choose an image or drop it here..."
+                        drop-placeholder="Drop image here..."
+                    ></b-form-file>
+                </b-form-group>
+                <b-form-row v-if="isEdit">
+                    <b-col align="center">
+                        <b-img thumbnail rounded :src="`/storage/${photo_url}`" fluid alt="Product photo"></b-img>
+                    </b-col>
+                </b-form-row>
             </item-add-edit>
             <div v-else class="text-center text-secondary my-2">
                 <b-spinner class="align-middle"></b-spinner>
@@ -31,8 +49,9 @@ import ItemAddEdit from "../../components/item/ItemAddEdit.vue";
 import FormField from "../../components/form/FormField.vue";
 import FormSearchableSelect from "../../components/form/FormSearchableSelect.vue";
 import { AlertType, createAlert } from "../../utils/alert";
-import { AxiosPromise } from "axios";
+import Axios, { AxiosPromise } from "axios";
 import { Params } from "../../stores/api";
+import router from "../../router";
 
 @Component({
     components: {
@@ -58,17 +77,21 @@ import { Params } from "../../stores/api";
     }),
 
     methods: {
-        ...mapActions(["getProduct"]),
+        ...mapActions(["getProduct", "putProduct", "postProduct"]),
     }
 })
 
 export default class ProductAddEditView extends Vue {
     getProduct!: (obj?: Params) => AxiosPromise;
+    putProduct!: (obj?: Params) => AxiosPromise;
+    postProduct!: (obj?: Params) => AxiosPromise;
 
     product?: ProductModel;
     form?: ProductModel;
     itemLoaded?: boolean;
     isEdit?: boolean;
+    image?: any;
+    photo_url?: string;
 
     data() {
         let obj = this;
@@ -77,12 +100,44 @@ export default class ProductAddEditView extends Vue {
             form: {},
             isEdit: false,
             itemLoaded: false,
+            image: null,
 
             onSubmit() {
+                let formData = new FormData();
+                for (let e of Object.entries(obj.form || {})) {
+                    formData.append(e[0], e[1]);
+                }
+
+                if (obj.image != undefined && obj.image != null)
+                    formData.append("photo_url", obj.image);
+
                 if (obj.isEdit) {
-
+                    console.log(formData);
+                    Axios({
+                        url: `products/${obj.product?.id}`,
+                        data: formData,
+                        headers: {
+                            'content-type': 'multipart/form-data'
+                        },
+                        method: 'POST'
+                    }).then(() => {
+                        router.go(-1);
+                    }).catch((err) => {
+                        createAlert(AlertType.Danger, `Error updating product ${obj.product?.name}: ${err}`);
+                    })
                 } else {
-
+                    Axios({
+                        url: `products`,
+                        data: formData,
+                        headers: {
+                            'content-type': 'multipart/form-data'
+                        },
+                        method: 'POST'
+                    }).then(() => {
+                        router.go(-1);
+                    }).catch((err) => {
+                        createAlert(AlertType.Danger, `Error creating product: ${err}`);
+                    })
                 }
             },
 
@@ -104,8 +159,8 @@ export default class ProductAddEditView extends Vue {
                         price: this.product?.price,
                         type: this.product?.type,
                         description: this.product?.description,
-                        photo_url: this.product?.photo_url,
                 };
+                this.photo_url = this.product?.photo_url;
 
                 this.itemLoaded = true;
             }).catch((err) => {

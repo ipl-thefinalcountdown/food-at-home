@@ -53,9 +53,12 @@ const api : Store = new Vapi({
 	})
 	.put({
 		action: "putProduct",
-		property: "product",
 		path: (opt: ParamsOptions) => `/products/${opt.id}`
-	})
+    })
+    .post({
+        action: "postProduct",
+        path: (opt: ParamsOptions) => `/products`
+    })
 	.get({
 		action: "getProfile",
 		property: "profile",

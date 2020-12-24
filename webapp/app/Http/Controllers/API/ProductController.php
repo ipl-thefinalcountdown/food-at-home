@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -37,5 +38,43 @@ class ProductController extends Controller
     public function delete(Product $product)
     {
         $product->delete();
+    }
+
+    public function put(Request $request, Product $product)
+    {
+        $this->validate($request, [
+            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'price' => 'required|numeric',
+            'type' => 'in:drink,dessert,hot dish,cold dish',
+            'description' => 'required'
+            ]);
+
+        if ($request->hasFile('photo_url'))
+        {
+            $path = 'public/products/'.$product->photo_url;
+            if (file_exists(storage_path('app/'.$path))) Storage::delete($path);
+
+            $path = $request->photo_url->store('/public/products');
+            $product->photo_url = basename($path);
+        }
+
+        $product->fill($request->only('name', 'price', 'type', 'description'))->save();
+    }
+
+    public function post(Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'price' => 'required|numeric',
+            'type' => 'in:drink,dessert,hot dish,cold dish',
+            'description' => 'required',
+            'photo_url' => 'file'
+            ]);
+
+        $path = $request->photo_url->store('/public/products');
+        $product = new Product();
+        $product->fill($request->only('name', 'price', 'type', 'description'));
+        $product->photo_url = basename($path);
+        $product->save();
     }
 }

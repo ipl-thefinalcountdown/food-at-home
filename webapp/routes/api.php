@@ -25,7 +25,8 @@ Route::middleware('guest')->group(function() {
 Route::middleware(['auth:sanctum'])->group(function () {
     // FIXME: only a manager can access these
     Route::delete('/products/{product}', 'ProductController@delete')->name('delete-product');
-    Route::put('/products/{product}', 'ProductController@put')->name('put-product');
+    Route::post('/products/{product}', 'ProductController@put')->name('put-product');
+    Route::post('/products', 'ProductController@post')->name('post-product');
 
     Route::get('/user', 'UserController@index');
 
