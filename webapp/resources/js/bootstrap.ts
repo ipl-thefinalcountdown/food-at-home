@@ -22,3 +22,6 @@ import 'bootstrap';
 import axios from "axios";
 
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// vue search select styles
+import 'vue-search-select/dist/VueSearchSelect.css'
