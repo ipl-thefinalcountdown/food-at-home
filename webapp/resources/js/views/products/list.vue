@@ -57,12 +57,13 @@ import { AxiosPromise } from "axios";
     }),
   },
   methods: {
-    ...mapActions(["getProducts", "deleteProduct"]),
+    ...mapActions(["getProducts", "deleteProduct", "putProduct"]),
   },
 })
 export default class ProductListView extends Vue {
   getProducts!: (obj: Params) => void;
   deleteProduct!: (obj: Params) => AxiosPromise;
+  putProduct!: (obj: Params) => void;
 
   filterText?: string = "";
   currentPage?: number | string;
@@ -90,13 +91,14 @@ export default class ProductListView extends Vue {
 
       addClicked(event: Event) {
           router.push({
-              name: "new-product"
+              name: "post-product"
           });
       },
 
       editClicked(product: ProductModel, index: number, event: Event) {
           router.push({
-              name: "edit-product"
+              name: "put-product",
+              params: { id: String(product?.id) },
           });
       },
 
