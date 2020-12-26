@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use App\Helpers\UserValidator;
 
 class AuthController extends Controller
 {
@@ -62,15 +62,16 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:3',
-            'address' => 'required',
-            'phone' => 'required',
-            'nif' => 'nullable|numeric|digits:9',
-            'photo' => 'nullable|image|max:8192'
-        ]);
+        if($request->has('type') && $request->type != 'C')
+            return response()->json([
+                'status_code' => 400,
+                'message' => 'Bad request. Invalid data.',
+                'errors' => [
+                    'type' => 'Can only be customer on registration'
+                ]
+            ], 400);
+
+        $validator = UserValidator::validateOnCreate($request);
 
         if($validator->fails()) {
             return response()->json([
@@ -92,7 +93,7 @@ class AuthController extends Controller
 
         if ($request->hasFile('photo')) {
             $path = $request->photo->store('public/fotos');
-            $customer->photo_url = basename($path);
+            $user->photo_url = basename($path);
         }
 
         $customer->push();

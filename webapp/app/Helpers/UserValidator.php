@@ -15,7 +15,11 @@ class UserValidator
             'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:3',
-            'photo' => 'nullable|image|max:8192'
+            'photo' => 'nullable|image|max:8192',
+            'type' => [
+                'required',
+                Rule::in(['C', 'EC', 'EM', 'ED']),
+            ]
         ];
 
         if($request->has('type') && $request->type == 'C')
@@ -35,9 +39,7 @@ class UserValidator
         $validator_assocArr = [
             'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
             'email' => ['required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->using(function ($query) use ($user) {
-                    $query->where('id', '<>', $user->id);
-                })
+                Rule::unique('users', 'email')->ignoreModel($user)
             ],
             'photo' => 'nullable|image|max:8192'
         ];
