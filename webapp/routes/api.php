@@ -22,13 +22,31 @@ Route::middleware('guest')->group(function() {
     Route::post('/register', 'Auth\AuthController@register')->name('register');
 });
 
-Route::middleware(['auth:sanctum'])->group(function () {
-    // FIXME: only a manager can access these
+// Manager routes
+Route::middleware('auth:sanctum', 'user-manager')->group(function() {
+    // users routes
+    Route::get('/users', 'UserController@list');
+    Route::post('/users', 'UserController@create');
+    Route::get('/users/{user}', 'UserController@view');
+    Route::put('/users/{user}', 'UserController@update');
+    Route::delete('/users/{user}', 'UserController@delete');
+
+    // photo upload route
+    Route::post('/users/{user}/photo', 'UserController@photo');
+    Route::delete('/users/{user}/photo', 'UserController@photoDelete');
+
+    // products routes
     Route::delete('/products/{product}', 'ProductController@delete')->name('delete-product');
     Route::post('/products/{product}', 'ProductController@put')->name('put-product');
     Route::post('/products', 'ProductController@post')->name('post-product');
+});
 
-    Route::get('/user', 'UserController@index');
+Route::middleware(['auth:sanctum'])->group(function () {
+    // get current user info
+    Route::get('/user', 'UserController@profile');
+    Route::put('/user', 'UserController@updateProfile');
+    Route::post('/user/photo', 'UserController@photoProfile');
+    Route::delete('/user/photo', 'UserController@photoDeleteProfile');
 
     Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
 });
