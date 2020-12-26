@@ -9,6 +9,7 @@
           >
             <template #cell(photo)="data">
               <b-img v-if="data.value" thumbnail rounded :src="`/storage/${data.value}`" fluid alt="Product photo"></b-img>
+              <div class="text-secondary" v-else>No photo</div>
             </template>
           </item-details>
         </b-col>
