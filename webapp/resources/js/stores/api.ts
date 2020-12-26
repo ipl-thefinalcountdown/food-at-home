@@ -7,7 +7,8 @@ import { UserModel } from "../models/user";
 
 export interface Params {
 	params?: ParamsOptions
-	data?: object
+	data?: object,
+	meta?: object
 }
 
 export interface ParamsOptions {
@@ -28,7 +29,8 @@ const api : Store = new Vapi({
 		products: <LaravelResponse<Array<ProductModel>>>{data:[]},
 		product: <LaravelResponse<ProductModel>>{data:{}},
 
-		profile: <UserModel>{},
+		users: <LaravelResponse<Array<UserModel>>>{data:[]},
+		user: <UserModel>{},
 	}
 })
 	.get({
@@ -61,8 +63,48 @@ const api : Store = new Vapi({
     })
 	.get({
 		action: "getProfile",
-		property: "profile",
+		property: "user",
 		path: (opt: ParamsOptions) => `/user`
+	})
+	.get({
+		action: "getUser",
+		property: "user",
+		path: (opt: ParamsOptions) => `/users/${opt.id}`
+	})
+	.get({
+		action: "getUsers",
+		property: "users",
+		path: (opt: ParamsOptions) => {
+			let ret = `/users/?name=${opt.name}&page=${opt.page}`;
+			if (opt.type !== undefined)
+				ret.concat(`&type=${<ProductType>opt.type}`)
+
+			return ret;
+		}
+	})
+	.post({
+		action: "addUser",
+		path: (opt : ParamsOptions) => `/users`
+	})
+	.put({
+		action: "updateUser",
+		path: (opt : ParamsOptions) => `/users/${opt.id}`
+	})
+	.put({
+		action: "updateProfile",
+		path: (opt : ParamsOptions) => `/user`
+	})
+	.delete({
+		action: "deleteProfilePhoto",
+		path: (opt : ParamsOptions) => `/user/photo`
+	})
+	.delete({
+		action: "deleteUserPhoto",
+		path: (opt : ParamsOptions) => `/users/${opt.id}/photo`
+	})
+	.delete({
+		action: "deleteUser",
+		path: (opt : ParamsOptions) => `/users/${opt.id}`
 	})
 	.post({
 		action: "registerUser",

@@ -119,7 +119,10 @@
 		}
 		handleRegister() {
 			this.registerUser({
-				data: this.user
+				data: {
+					...this.user,
+					type: 'C'
+				}
 			}).then((res) => {
 				this.makeAuthRequest({
 					email: this.user.email,

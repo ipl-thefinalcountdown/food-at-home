@@ -1,13 +1,17 @@
 <template>
   <div>
     <b-navbar toggleable="lg" variant="light">
-      <b-navbar-brand to="/">Chantilly</b-navbar-brand>
+      <b-navbar-brand to="/">Food@Home</b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
       <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
           <b-nav-item :to="{name: 'list-products'}">Products</b-nav-item>
+          <div v-if="isAuthenticated">
+            <b-nav-item v-if="authUser.type == 'EM'" :to="{name: 'list-users'}">Users</b-nav-item>
+          </div>
+
         </b-navbar-nav>
 
         <!-- Right aligned nav items -->
