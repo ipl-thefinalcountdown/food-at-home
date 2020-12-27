@@ -4,11 +4,9 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Customer;
-use Illuminate\Support\Facades\DB;
-use App\Helpers\UserValidator;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
@@ -68,7 +66,7 @@ class UserController extends Controller
             ], 403);
         }
 
-		$validator = UserValidator::validateOnUpdate($request, $user);
+		$validator = UserController::validateOnUpdate($request, $user);
 
         if($validator->fails()) {
             return response()->json([
@@ -182,4 +180,26 @@ class UserController extends Controller
             'message' => 'User deleted!'
         ]);
     }
+
+    public static function validateOnUpdate(Request $request, User $user)
+	{
+        $validator_assocArr = [
+            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'email' => ['required', 'string', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignoreModel($user)
+            ],
+            'photo' => 'nullable|image|max:8192'
+        ];
+
+        if($user->type == 'C')
+        {
+            $validator_assocArr += [
+                'address' => 'required',
+                'phone' => 'required',
+                'nif' => 'nullable|numeric|digits:9'
+            ];
+        }
+
+		return Validator::make($request->all(), $validator_assocArr);
+	}
 }
