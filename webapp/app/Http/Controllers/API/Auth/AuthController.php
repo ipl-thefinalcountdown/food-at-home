@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\UserValidator;
+use App\Http\Requests\UserCreateRequest;
 
 class AuthController extends Controller
 {
@@ -52,7 +53,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request)
+    public function register(UserCreateRequest $request)
     {
         if(Auth::check())
         {
@@ -71,15 +72,7 @@ class AuthController extends Controller
                 ]
             ], 400);
 
-        $validator = UserValidator::validateOnCreate($request);
-
-        if($validator->fails()) {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => $validator->errors()
-            ], 400);
-        }
+        $request->validated();
 
         $user = new User();
         $user->fill($request->only('name', 'email', 'password'));
