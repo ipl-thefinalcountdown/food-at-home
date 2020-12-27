@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\ProductPostRequest;
+use App\Http\Requests\ProductPutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
@@ -40,14 +42,9 @@ class ProductController extends Controller
         $product->delete();
     }
 
-    public function put(Request $request, Product $product)
+    public function put(ProductPutRequest $request, Product $product)
     {
-        $this->validate($request, [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'price' => 'required|numeric',
-            'type' => 'in:drink,dessert,hot dish,cold dish',
-            'description' => 'required'
-            ]);
+        $validated = $request->validated();
 
         if ($request->hasFile('photo_url'))
         {
@@ -61,15 +58,9 @@ class ProductController extends Controller
         $product->fill($request->only('name', 'price', 'type', 'description'))->save();
     }
 
-    public function post(Request $request)
+    public function post(ProductPostRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'price' => 'required|numeric',
-            'type' => 'in:drink,dessert,hot dish,cold dish',
-            'description' => 'required',
-            'photo_url' => 'file'
-            ]);
+        $validated = $request->validated();
 
         $path = $request->photo_url->store('/public/products');
         $product = new Product();
