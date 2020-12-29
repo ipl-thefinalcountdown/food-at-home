@@ -65,6 +65,7 @@ watch-frontend:
 install-all:
 	make install-bootstrap-webapp
 	make install-websockets
+	make install-composer
 
 install-bootstrap-webapp:
 	@echo "Installing webapp dependencies..."
@@ -73,6 +74,10 @@ install-bootstrap-webapp:
 install-websockets:
 	@echo "Installing websockets dependencies..."
 	@cd websockets; npm install
+
+install-composer:
+	@echo "Installing composer dependencies..."
+	@cd webapp; composer install
 
 status:
 	@docker-compose ps --all
