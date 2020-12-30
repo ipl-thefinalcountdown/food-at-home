@@ -23,7 +23,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import { mapState, mapActions } from "vuex";
-import axios from "axios";
+import axios, { AxiosPromise } from "axios";
 
 import PageComponent from "../../components/Page.vue";
 import ItemEdit from "../../components/item/ItemAddEdit.vue";
@@ -35,15 +35,33 @@ import { AlertType, createAlert } from "../../utils/alert";
 import { Params } from "../../stores/api";
 
 import router from "../../router"
+import { UserModel, UserType } from "../../models/user";
+import { namespace } from "vuex-class";
+
+const Auth = namespace("auth");
 
 @Component({
   components: {
     PageComponent,
     ItemEdit
   },
+
+  methods: {
+    ...mapActions([
+      "getUser",
+    ]),
+  },
 })
 export default class UserUploadPhotoView extends Vue {
-    file?: any = null
+    getUser!: (obj?: Params) => AxiosPromise;
+
+    file?: any = null;
+
+    @Auth.Getter
+    private isAuthenticated!: boolean;
+
+    @Auth.Getter
+    public authUser!: UserModel;
 
     onSubmit() {
         let formData = new FormData();
@@ -66,6 +84,18 @@ export default class UserUploadPhotoView extends Vue {
                 `Error uploading files ${this.file.name}: ${err}`
             );
         });
+    }
+
+    mounted() {
+        this.getUser({ params: { id: this.$route.params.id } }).then((result) => {
+            if (this.authUser?.type == UserType.EMPLOYEE_MANAGER && result.data?.type == UserType.CUSTOMER)
+                router.go(-1);
+        }).catch((err) => {
+          createAlert(
+            AlertType.Danger,
+            `Error on fetching user ${this.$route.params.id}: ${err}`
+          );
+        })
     }
 }
 </script>
