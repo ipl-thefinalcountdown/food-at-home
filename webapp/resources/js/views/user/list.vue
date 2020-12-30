@@ -11,6 +11,8 @@
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
+          :excludeDeleteUser="authUser"
+          :excludeEditUserType="excludeType"
         />
       </div>
     </div>
@@ -26,7 +28,7 @@ import PageComponent from "../../components/Page.vue";
 import SearchableTable from "../../components/SearchableTable.vue";
 
 import router from "../../router";
-import { UserModel } from "../../models/user";
+import { UserModel, UserType } from "../../models/user";
 import { AlertType, createAlert } from "../../utils/alert";
 
 import { Params, LaravelResponse } from "../../stores/api";
@@ -68,11 +70,14 @@ export default class UserListView extends Vue {
 
   @Auth.Getter
   private isAuthenticated!: boolean;
+
   @Auth.Getter
   public authUser!: UserModel;
 
   filterText?: string = "";
   currentPage?: number | string;
+
+  excludeType: string = UserType.CUSTOMER;
 
   addClicked()
   {
