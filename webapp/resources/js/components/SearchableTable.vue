@@ -31,6 +31,8 @@
         :no-select-on-click="true"
         :busy="awaitingSearch"
         :head-variant="headVariant"
+        :excludeDeleteUser="excludeDeleteUser"
+        :excludeEditUserType="excludeEditUserType"
         hover
         show-empty
         responsive="sm"
@@ -65,21 +67,37 @@
 
             <!-- Edit icon button -->
             <b-link
-              v-if="editClicked"
+              v-if="editClicked && excludeEditUserType && excludeEditUserType != scope.item.type"
               @click.prevent="editClicked(scope.item, scope.index, $event)"
               class="text-secondary"
             >
               <i class="fas fa-edit fa-lg"></i>
             </b-link>
+            <b-link
+              v-else-if="editClicked && !excludeEditUserType"
+              @click.prevent="editClicked(scope.item, scope.index, $event)"
+              class="text-secondary"
+            >
+              <i class="fas fa-edit fa-lg"></i>
+            </b-link>
+            <i v-else class="fas fa-edit fa-lg text-light"></i>
 
             <!-- Delete icon button -->
             <b-link
-              v-if="deleteClicked"
+              v-if="deleteClicked && excludeDeleteUser && excludeDeleteUser.id != scope.item.id"
               @click.prevent="deleteClicked(scope.item, scope.index, $event)"
               class="text-danger"
             >
               <i class="fas fa-trash-alt fa-lg"></i>
             </b-link>
+            <b-link
+              v-else-if="deleteClicked && !excludeDeleteUser"
+              @click.prevent="deleteClicked(scope.item, scope.index, $event)"
+              class="text-danger"
+            >
+              <i class="fas fa-trash-alt fa-lg"></i>
+            </b-link>
+            <i v-else class="fas fa-trash-alt fa-lg text-light"></i>
           </div>
         </template>
 
@@ -131,6 +149,10 @@ export default Vue.extend({
     pageChanged: Function,
 
     metaTotal: [Number, String],
+
+    excludeDeleteUser: Object,
+
+    excludeEditUserType: String
   },
   data() {
     let obj = this;
