@@ -179,6 +179,9 @@ export default class UserAddEditView extends Vue {
         : this.getUser({ params: { id: this.userId } })
       )
         .then(() => {
+          if (this.authUser.type === UserType.EMPLOYEE_MANAGER && this.user?.type === UserType.CUSTOMER) {
+              router.go(-1);
+          }
           let optional =
             this.user?.type == UserType.CUSTOMER
               ? {
