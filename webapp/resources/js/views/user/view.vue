@@ -2,7 +2,20 @@
   <page-component>
     <div class="container">
       <b-row cols="1">
-        <b-col>
+        <b-col v-if="items[0].type === userType">
+          <item-details
+            :items="items"
+            :awaiting-items="pending.user"
+          >
+            <template #cell(photo)="data">
+              <div>
+                <b-img v-if="data.value" thumbnail rounded :src="`/storage/fotos/${data.value}`" fluid alt="Product photo"></b-img>
+                <span class="text-secondary" v-else>No photo</span>
+              </div>
+            </template>
+          </item-details>
+        </b-col>
+        <b-col v-else>
           <item-details
             :items="items"
             :awaiting-items="pending.user"
@@ -31,7 +44,7 @@ import PageComponent from "../../components/Page.vue";
 import ItemDetails from "../../components/item/ItemDetails.vue";
 import SearchableTable from "../../components/SearchableTable.vue";
 import { mapState, mapActions } from "vuex";
-import { UserModel } from "../../models/user";
+import { UserModel, UserType } from "../../models/user";
 import { AlertType, createAlert } from "../../utils/alert";
 import { deSnakeCase } from "../../utils/string";
 import { Params } from "../../stores/api";
@@ -103,6 +116,8 @@ export default class ProfileView extends Vue {
 
   isProfile?: boolean;
   userId?: string;
+
+  userType: string = UserType.CUSTOMER;
 
   editClicked() {
     if(this.isProfile)
