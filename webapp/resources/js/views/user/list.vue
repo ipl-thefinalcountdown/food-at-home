@@ -11,9 +11,8 @@
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
-          :excludeDeleteUser="authUser"
-          :excludeEditUserType="excludeType"
-        />
+        >
+        </searchable-table>
       </div>
     </div>
   </page-component>
@@ -44,14 +43,13 @@ const Auth = namespace("auth");
   },
   computed: {
     ...mapState({
-      items: (state: any) => {
+      items(state: any) {
         return state.api.users.data.map((u: UserModel) => {
           return {
             id: u.id,
             name: u.name,
-            type: u.type
           };
-        });
+        }).filter((u: UserModel) => u.id !== this.authUser.id);
       },
 
       total: (state: any) => state.api.users.meta == undefined ? 0 : state.api.users.meta.total,
