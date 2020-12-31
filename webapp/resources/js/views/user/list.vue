@@ -12,6 +12,10 @@
           :page-changed="pageChanged"
           :meta-total="total"
         >
+          <template #cell(blocked)="data">
+              <span v-if="data.item.blocked" :class="`pr-2 pl-2 badge badge-pill badge-danger`">{{ 'Blocked' }}</span>
+              <span v-else :class="`pr-2 pl-2 badge badge-pill badge-success`">{{ 'Available' }}</span>
+          </template>
         </searchable-table>
       </div>
     </div>
@@ -48,6 +52,7 @@ const Auth = namespace("auth");
           return {
             id: u.id,
             name: u.name,
+            blocked: u.blocked,
           };
         }).filter((u: UserModel) => u.id !== this.authUser.id);
       },
