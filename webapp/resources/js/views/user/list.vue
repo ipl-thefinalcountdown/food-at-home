@@ -8,6 +8,7 @@
           :add-clicked="addClicked"
           :edit-clicked="editClicked"
           :delete-clicked="deleteClicked"
+          :block-clicked="blockClicked"
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
@@ -125,6 +126,11 @@ export default class UserListView extends Vue {
             );
           });
   }
+
+  blockClicked(record: UserModel, index: number, event: Event) {
+
+  }
+
   filterChanged(text: string) {
     this.getUsers({ params: { name: text } });
     this.filterText = text;
