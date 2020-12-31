@@ -39,6 +39,7 @@ import { Params, LaravelResponse } from "../../stores/api";
 import { AxiosPromise } from "axios";
 
 import { namespace } from "vuex-class";
+import { deSnakeCase } from "../../utils/string";
 const Auth = namespace("auth");
 
 @Component({
@@ -54,6 +55,9 @@ const Auth = namespace("auth");
             id: u.id,
             name: u.name,
             blocked: u.blocked,
+            type: (() => Object.entries(UserType)
+                .filter(t => t[1] == u.type)
+                .map(arr => deSnakeCase(arr[0])))()[0]
           };
         }).filter((u: UserModel) => u.id !== this.authUser.id);
       },
