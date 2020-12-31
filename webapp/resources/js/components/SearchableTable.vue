@@ -63,6 +63,15 @@
               <i class="fas fa-cart-plus fa-lg"></i>
             </b-link>
 
+            <!-- Block icon button -->
+            <b-link
+                v-if="blockClicked"
+                @click.prevent="blockClicked(scope.item, scope.index, $event)"
+            >
+              <i v-if="scope.item.blocked" class="fas fa-ban fa-lg text-secondary"/>
+              <i v-else class="fas fa-ban fa-lg text-danger"/>
+            </b-link>
+
             <!-- Edit icon button -->
             <b-link
               v-if="editClicked"
@@ -125,6 +134,8 @@ export default Vue.extend({
     deleteClicked: Function,
     /// callback when row cart button is clicked
     cartClicked: Function,
+
+    blockClicked: Function,
     // boolean for defining header action label
     noActionLabel: Boolean,
 
