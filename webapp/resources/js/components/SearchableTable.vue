@@ -74,6 +74,10 @@
           </div>
         </template>
 
+        <template v-for="slotName in Object.keys($scopedSlots)" v-slot:[slotName]="slotScope">
+            <slot :name="slotName" v-bind="slotScope"></slot>
+        </template>
+
         <!-- User slot -->
         <slot></slot>
       </b-table>
