@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UserPostRequest;
 
 class UserController extends Controller
 {
@@ -35,7 +36,14 @@ class UserController extends Controller
                 ? $query->paginate()
                 : $query->get()
         );
-	}
+    }
+
+    public function create(UserPostRequest $request)
+    {
+        $request->validate();
+        $user = new User();
+        $user->fill($request->all())->save();
+    }
 
 	public function view(User $user)
 	{
