@@ -186,5 +186,22 @@ class UserController extends Controller
         }
 
 		return Validator::make($request->all(), $validator_assocArr);
-	}
+    }
+
+    private function savePhoto($photo)
+    {
+        $path = $photo->store('public/fotos');
+        return basename($path);
+    }
+
+    private function deleteAndSavePhoto($photo, User $user)
+    {
+        if(!is_null($user->photo_url))
+        {
+            $path = 'public/fotos/'.$user->photo_url;
+            if(Storage::exists($path)) Storage::delete($path);
+        }
+
+        return savePhoto($photo);
+    }
 }
