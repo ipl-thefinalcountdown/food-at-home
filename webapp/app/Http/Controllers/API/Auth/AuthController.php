@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\UserValidator;
-use App\Http\Requests\UserCreateRequest;
+use App\Http\Requests\AuthPostRequest;
 
 class AuthController extends Controller
 {
@@ -53,17 +53,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(UserCreateRequest $request)
+    public function register(AuthPostRequest $request)
     {
-        if($request->has('type') && $request->type != 'C')
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => [
-                    'type' => 'Can only be customer on registration'
-                ]
-            ], 400);
-
         $request->validated();
 
         $user = new User();
@@ -82,7 +73,5 @@ class AuthController extends Controller
         }
 
         $customer->push();
-
-        return response()->json($customer, 201);
     }
 }
