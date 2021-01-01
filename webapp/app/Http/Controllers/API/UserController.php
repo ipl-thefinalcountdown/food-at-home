@@ -41,9 +41,17 @@ class UserController extends Controller
 
     public function create(UserPostRequest $request)
     {
-        $request->validate();
+        $validated = $request->validated();
         $user = new User();
-        $user->fill($request->all())->save();
+        $user->fill($request->only('name', 'email', 'type'));
+        $user->password = Hash::make($request->password);
+
+        if ($request->has('photo'))
+            $user->photo = savePhoto($request->photo);
+
+        $user->save();
+
+        return response()->json($user);
     }
 
 	public function view(User $user)
@@ -74,16 +82,8 @@ class UserController extends Controller
 		if($request->has('password'))
 			$user->password = Hash::make($request->password);
 
-		if ($request->hasFile('photo')) {
-            if(!is_null($user->photo_url))
-            {
-                $path = 'public/fotos/'.$user->photo_url;
-                if(file_exists(storage_path('app/'.$path))) Storage::delete($path);
-            }
-
-            $path = $request->photo->store('public/fotos');
-            $user->photo_url = basename($path);
-        }
+		if ($request->hasFile('photo'))
+            $user->photo_url = deleteAndSavePhoto($request->photo, $user);
 
         $user->save();
 
