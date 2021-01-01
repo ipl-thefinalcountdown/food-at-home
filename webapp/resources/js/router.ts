@@ -60,9 +60,9 @@ export default new VueRouter({
 
 		// Products
 		{ path: '/products', name: 'list-products', component: ProductListView },
-		{ path: '/products/new', name: 'post-product', component: ProductAddEdit },
+		{ path: '/products/new', name: 'post-product', component: ProductAddEdit, beforeEnter: authenticatedRole(UserType.EMPLOYEE_MANAGER) },
 		{ path: '/products/:id', name: 'view-product', component: ProductView },
-		{ path: '/products/:id/edit', name: 'put-product', component: ProductAddEdit },
+		{ path: '/products/:id/edit', name: 'put-product', component: ProductAddEdit, beforeEnter: authenticatedRole(UserType.EMPLOYEE_MANAGER) },
 
 		// Auth
 		{ path: '/login', name: 'login', component: LoginView, beforeEnter: ifNotAuthenticated },
