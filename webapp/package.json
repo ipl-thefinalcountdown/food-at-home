@@ -36,6 +36,7 @@
         "vue-search-select": "^2.9.3",
         "vue-socket.io": "^3.0.10",
         "vue-template-compiler": "^2.6.12",
+        "vue-visible": "^1.0.2",
         "vuex": "^3.6.0",
         "vuex-class": "^0.3.2",
         "vuex-module-decorators": "^1.0.1",
