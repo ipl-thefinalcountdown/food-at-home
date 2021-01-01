@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\UserPostRequest;
+use App\Http\Requests\UserPutRequest;
 
 class UserController extends Controller
 {
@@ -64,44 +65,20 @@ class UserController extends Controller
 		return $this->update($request, $request->user());
 	}
 
-	public function update(Request $request, User $user)
+	public function update(UserPutRequest $request, User $user)
 	{
-        if($request->user()->type == 'EM' && $user->type == 'C')
-        {
-            return response()->json([
-                'status_code' => 403,
-                'message' => 'Forbidden',
-            ], 403);
-        }
+		$request->validated();
 
-		$validator = UserController::validateOnUpdate($request, $user);
-
-        if($validator->fails()) {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => $validator->errors()
-            ], 400);
-		}
-
-		$user->fill($request->only('name', 'email'));
+		$user->fill($request->only('name', 'email', 'type'));
 
 		if($request->has('password'))
 			$user->password = Hash::make($request->password);
-
-		if($user->type == 'C')
-		{
-			$customer = Customer::find($user->id);
-			$customer->fill($request->only('address', 'phone', 'nif'));
-			$customer->save();
-		}
 
 		if ($request->hasFile('photo')) {
             if(!is_null($user->photo_url))
             {
                 $path = 'public/fotos/'.$user->photo_url;
-                if(Storage::exists($path))
-                    Storage::delete($path);
+                if(file_exists(storage_path('app/'.$path))) Storage::delete($path);
             }
 
             $path = $request->photo->store('public/fotos');
