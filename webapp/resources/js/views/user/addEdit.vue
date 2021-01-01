@@ -146,11 +146,11 @@ export default class UserAddEditView extends Vue {
           // go back
           router.go(-1);
         })
-        .catch((err) => {
-          createAlert(
-            AlertType.Danger,
-            `Error on updating user ${this.user?.name}: ${err}`
-          );
+        .catch((request) => {
+          let errors = request.response.data.errors;
+          for (const error in errors) {
+              createAlert(AlertType.Danger, `Error editing user: ${error}: ${errors[error]}`);
+          }
         });
     } else {
       this.addUser({ data: this.form })
@@ -158,8 +158,11 @@ export default class UserAddEditView extends Vue {
           // go back
           router.go(-1);
         })
-        .catch((err) => {
-          createAlert(AlertType.Danger, `Error on adding user: ${err}`);
+        .catch((request) => {
+          let errors = request.response.data.errors;
+          for (const error in errors) {
+              createAlert(AlertType.Danger, `Error adding user: ${error}: ${errors[error]}`);
+          }
         });
     }
   }
