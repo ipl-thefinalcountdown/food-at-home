@@ -76,14 +76,6 @@ class AuthController extends Controller
 
     public function register(UserCreateRequest $request)
     {
-        if(Auth::check())
-        {
-            return response()->json([
-                'status_code' => 401,
-                'message' => 'Unauthorized register on authenticated user.'
-            ], 401);
-        }
-
         if($request->has('type') && $request->type != 'C')
             return response()->json([
                 'status_code' => 400,
@@ -96,8 +88,8 @@ class AuthController extends Controller
         $request->validated();
 
         $user = new User();
-        $user->fill($request->only('name', 'email', 'password'));
-        $user->password = Hash::make($user->password);
+        $user->fill(array_merge($request->only('name', 'email') + ['type' => 'C']));
+        $user->password = Hash::make($request->password);
         $user->save();
 
         $customer = new Customer();
