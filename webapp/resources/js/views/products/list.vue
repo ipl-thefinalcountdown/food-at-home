@@ -2,7 +2,7 @@
   <page-component>
     <div class="container">
       <div class="justify-content-center">
-        <searchable-table
+        <searchable-table v-if="authUser.type === userType"
           :items="items"
           :row-clicked="rowClicked"
           :cart-clicked="(isAuthenticated && authUser.type == 'C') ? cartClicked : undefined"
@@ -20,6 +20,14 @@
         </template>
 
         </searchable-table>
+        />
+        <searchable-table v-else
+          :items="items"
+          :row-clicked="rowClicked"
+          :filter-changed="filterChanged"
+          :page-changed="pageChanged"
+          :meta-total="total"
+        />
       </div>
     </div>
   </page-component>
@@ -35,13 +43,13 @@ import SearchableTable from "../../components/SearchableTable.vue";
 
 import router from "../../router";
 import { ProductModel } from "../../models/product";
-import { UserModel } from "../../models/user";
 import { AlertType, createAlert } from "../../utils/alert";
 
 import { Params, LaravelResponse } from "../../stores/api";
 import { AxiosPromise } from "axios";
-
 import { namespace } from "vuex-class";
+import { UserModel, UserType } from "../../models/user";
+
 const Cart = namespace("cart");
 const Auth = namespace("auth");
 
@@ -93,6 +101,8 @@ export default class ProductListView extends Vue {
   cartClicked(record: ProductModel, index: number, event: Event) {
     this.addCartProductAction(record);
   }
+
+  userType: string = UserType.EMPLOYEE_MANAGER;
 
   data() {
     let obj = this;
