@@ -17,6 +17,39 @@
               <span v-if="data.item.blocked" :class="`pr-2 pl-2 badge badge-pill badge-danger`">{{ 'Blocked' }}</span>
               <span v-else :class="`pr-2 pl-2 badge badge-pill badge-success`">{{ 'Available' }}</span>
           </template>
+          <template #cell(__actions)="scope">
+              <div class="text-nowrap text-right">
+
+              <!-- Block icon button -->
+              <b-link
+                  v-if="blockClicked"
+                  @click.prevent="blockClicked(scope.item, scope.index, $event)"
+              >
+                <i v-if="scope.item.blocked" class="fas fa-ban fa-lg text-secondary"/>
+                <i v-else class="fas fa-ban fa-lg text-danger"/>
+              </b-link>
+
+              <!-- Edit icon button -->
+              <b-link
+                v-if="editClicked && scope.item.type != 'Customer'"
+                @click.prevent="editClicked(scope.item, scope.index, $event)"
+                class="text-secondary"
+              >
+                <i class="fas fa-edit fa-lg"></i>
+              </b-link>
+              <i v-else v-visible="false" class="fas fa-edit fa-lg"></i>
+
+              <!-- Delete icon button -->
+              <b-link
+                v-if="deleteClicked && scope.item.type != 'Customer'"
+                @click.prevent="deleteClicked(scope.item, scope.index, $event)"
+                class="text-danger"
+              >
+                <i class="fas fa-trash-alt fa-lg"></i>
+              </b-link>
+              <i v-else v-visible="false" class="fas fa-trash-alt fa-lg"></i>
+            </div>
+          </template>
         </searchable-table>
       </div>
     </div>
@@ -26,6 +59,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
+import VueVisible from 'vue-visible';
 import { mapState, mapActions } from "vuex";
 
 import PageComponent from "../../components/Page.vue";
@@ -41,6 +75,8 @@ import { AxiosPromise } from "axios";
 import { namespace } from "vuex-class";
 import { deSnakeCase } from "../../utils/string";
 const Auth = namespace("auth");
+
+Vue.use(VueVisible);
 
 @Component({
   components: {
