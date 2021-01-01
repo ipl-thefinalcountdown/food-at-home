@@ -120,8 +120,7 @@
 		handleRegister() {
 			this.registerUser({
 				data: {
-					...this.user,
-					type: 'C'
+					...this.user
 				}
 			}).then((res) => {
 				this.makeAuthRequest({
