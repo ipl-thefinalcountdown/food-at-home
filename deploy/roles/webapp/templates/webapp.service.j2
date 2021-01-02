@@ -1,0 +1,10 @@
+[Unit]
+Description=Start webapp
+Requires=mysqld.service
+After=mysqld.service
+
+[Service]
+Type=oneshot
+User={{ webapp_user }}
+WorkingDirectory="{{ webapp_dir }}"
+ExecStart=/usr/bin/npm run prod

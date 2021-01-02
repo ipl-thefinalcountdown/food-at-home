@@ -1,0 +1,21 @@
+[global]
+error_log = syslog
+daemonize = no
+
+[{{ webapp_user }}]
+listen = {{ webapp_socket }}
+listen.owner = {{ webapp_user }}
+listen.group = http
+listen.mode = 0660
+
+pm = dynamic
+pm.max_children = 80
+pm.start_servers = 20
+pm.min_spare_servers = 10
+pm.max_spare_servers = 20
+pm.max_requests = 2000
+
+php_admin_value[open_basedir] = {{webapp_dir}}:/etc/webapp/
+php_admin_value[upload_tmp_dir] = {{ webapp_dir }}/uploads
+php_admin_value[session.save_path] = {{ webapp_dir }}/sessions
+env[TMPDIR] = {{ webapp_dir }}/uploads

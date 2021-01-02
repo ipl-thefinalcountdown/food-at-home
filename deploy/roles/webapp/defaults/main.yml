@@ -1,0 +1,9 @@
+---
+
+webapp_domain: 'food-at-home.lsferreira.net'
+webapp_dir: '/srv/http/webapp'
+
+webapp_db_host: 'localhost'
+
+webapp_user: 'webapp'
+webapp_socket: '/run/php-fpm/{{ webapp_user }}.socket'

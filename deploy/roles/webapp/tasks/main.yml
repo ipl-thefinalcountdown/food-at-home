@@ -1,0 +1,113 @@
+---
+
+- name: install required packages
+  apt:
+    state: present
+    name:
+      - npm
+      - nodejs
+      - composer
+
+- name: make webapp user
+  user:
+    name: "{{ webapp_user }}"
+    shell: /bin/bash
+    createhome: yes
+
+- name: create webapp directory
+  file:
+    path: "{{ webapp_dir }}"
+    state: directory
+    owner: "{{ webapp_user }}"
+    group: http
+    mode: 0775
+
+- name: copy webapp
+  copy:
+    src: app/webapp
+    dest: "{{ webapp_dir }}"
+  become: true
+  become_user: "{{ webapp_user }}"
+  register: release
+
+- name: copy webbsockets
+  copy:
+    src: app/websockets
+    dest: "{{ webapp_dir }}"
+  become: true
+  become_user: "{{ webapp_user }}"
+  register: release
+
+- name: create db
+  mysql_db:
+    name: "{{ db.database }}"
+    login_host: "{{ webapp_db_host }}"
+    login_password: "{{ db.root_password }}"
+    encoding: utf8
+  register: db_created
+  no_log: true
+
+- name: create db user
+  mysql_user:
+    name: "{{ db.user }}"
+    password: "{{ db.password }}"
+    login_host: "{{ webapp_db_host }}"
+    login_password: "{{ db.root_password }}"
+    priv: "{{ db.database }}.*:ALL"
+  no_log: true
+
+- name: install webapp composer dependencies
+  command: composer install
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+
+- name: install webapp npm dependencies
+  command: npm install
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: install websockets dependencies
+  command: npm install
+  args:
+    chdir: "{{ webapp_dir }}/websockets"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: set up nginx
+  template:
+    src: nginx.d.conf.j2
+    dest: "{{ webapp_nginx_conf }}"
+    owner: root
+    group: root
+    mode: 644
+  notify: reload nginx
+  tags: ['nginx']
+
+- name: make nginx log dir
+  file:
+    path: "/var/log/nginx/{{ webapp_domain }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: configure php-fpm
+  template:
+    src: php-fpm.conf.j2
+    dest: "/etc/php/php-fpm.d/{{ webapp_user }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart php-fpm@{{ webapp_user }}
+
+- name: start and enable systemd socket
+  service:
+    name: php-fpm@{{ webapp_user }}.socket
+    state: started
+    enabled: true
