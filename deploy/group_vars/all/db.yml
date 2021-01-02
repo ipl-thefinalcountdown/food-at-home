@@ -1,0 +1,7 @@
+---
+
+db:
+  root_password: mardb
+  database: sql_db1
+  user: db_user
+  password: db_user
