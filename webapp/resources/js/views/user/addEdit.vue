@@ -45,7 +45,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import { mapState, mapActions } from "vuex";
-import { AxiosPromise } from "axios";
+import Axios, { AxiosPromise } from "axios";
 
 import PageComponent from "../../components/Page.vue";
 import ItemEdit from "../../components/item/ItemAddEdit.vue";
@@ -117,6 +117,8 @@ export default class UserAddEditView extends Vue {
   user?: UserModel;
   form: UserModel = {};
 
+  error?: any;
+
   passwordValid?: boolean;
   password: string = "";
   passwordConfirmation: string = "";
@@ -166,6 +168,7 @@ export default class UserAddEditView extends Vue {
         });
     }
   }
+
   onReset(ev: Event) {
     ev.preventDefault();
     this.setEditFields();
@@ -191,12 +194,19 @@ export default class UserAddEditView extends Vue {
 
           this.itemLoaded = true;
         })
-        .catch((err) => {
-          createAlert(
-            AlertType.Danger,
-            `Error on fetching user ${this.userId}: ${err}`
-          );
-        });
+        .catch((request) => {
+          router.push({ name: "list-users" })
+            .then(() => {
+                if (request.response.data.errors) {
+                    let errors = request.response.data.errors;
+                    for (const error in errors) {
+                        createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${error}: ${errors[error]}`);
+                    }
+                } else {
+                    createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${request.response.data.message}`);
+                }
+            });
+        })
     }
   }
 
