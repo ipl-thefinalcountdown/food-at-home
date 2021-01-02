@@ -1,0 +1,10 @@
+---
+
+- name: daemon reload
+  systemd:
+    daemon-reload: yes
+
+- name: restart php-fpm@{{ webapp_user }}
+  service:
+    name: php-fpm@{{ webapp_user }}
+    state: restarted
