@@ -105,12 +105,13 @@ Vue.use(VueVisible);
     }),
   },
   methods: {
-    ...mapActions(["getUsers", "deleteUser"]),
+    ...mapActions(["getUsers", "deleteUser", "blockUser"]),
   },
 })
 export default class UserListView extends Vue {
   getUsers!: (obj: Params) => void;
   deleteUser!: (obj: Params) => AxiosPromise;
+  blockUser!: (obj: Params) => AxiosPromise;
 
   @Auth.Getter
   private isAuthenticated!: boolean;
@@ -154,7 +155,7 @@ export default class UserListView extends Vue {
           .deleteUser({ params: { id: record.id } })
           .then(() => {
             // success deletion
-            createAlert(AlertType.Success, `User ${record.id} deleted.`);
+            createAlert(AlertType.Success, `User ${record.name} deleted.`);
             // splice directly from the store state objectect
             (<Array<UserModel>>this.$store.state.api.users.data).splice(index, 1);
           })
@@ -168,7 +169,21 @@ export default class UserListView extends Vue {
   }
 
   blockClicked(record: UserModel, index: number, event: Event) {
-
+      console.log(!record.blocked);
+      this.blockUser({
+          params: { id: record.id },
+          data: { blocked: !record.blocked }
+      })
+      .then((response) => {
+          createAlert(AlertType.Success, `User "${record.name}" ${!record.blocked ? 'blocked' : 'unblocked'}.`);
+          record.blocked = response.data.blocked;
+      })
+      .catch((request) => {
+          let errors = request.response.data.errors;
+          for (const error in errors) {
+              createAlert(AlertType.Danger, `Error blocking "${record.name}": ${error}: ${errors[error]}`);
+          }
+      })
   }
 
   filterChanged(text: string) {
