@@ -65,7 +65,7 @@ import { ProductModel } from "../../models/product";
   },
 })
 export default class ProductView extends Vue {
-  getProduct!: (obj: Params) => void;
+  getProduct!: (obj: Params) => AxiosPromise;
 
   productId?: number | string;
 
@@ -75,7 +75,20 @@ export default class ProductView extends Vue {
 
   mounted() {
     this.productId = this.$route.params.id;
-    this.getProduct({ params: { id: this.productId } });
+    this.getProduct({ params: { id: this.productId } })
+      .catch((request) => {
+          router.push({ name: "list-products" })
+            .then(() => {
+              if (request.response.data.errors) {
+                let errors = request.response.data.errors;
+                for (const error in errors) {
+                  createAlert(AlertType.Danger, `Error fetching product (${this.productId}): ${error}: ${errors[error]}`);
+                }
+              } else {
+                createAlert(AlertType.Danger, `Error fetching product (${this.productId}): ${request.response.data.message}`);
+              }
+          });
+        })
   }
 }
 </script>

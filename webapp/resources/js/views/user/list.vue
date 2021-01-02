@@ -135,36 +135,33 @@ export default class UserListView extends Vue {
       params: { id: String(record?.id) },
     });
   }
+
   editClicked(record: UserModel, index: number, event: Event) {
     router.push({
       name: "edit-user",
       params: { id: String(record?.id) },
     });
   }
+
   deleteClicked(record: UserModel, index: number, event: Event) {
      // perform delete on the API
-     if(record.id == this.authUser.id)
+      if(record.id == this.authUser.id)
       {
-        createAlert(
-          AlertType.Danger,
-          `Can't delete yourself!`
-        );
+        createAlert(AlertType.Danger, `Can't delete yourself!`);
         return;
       }
-        this
-          .deleteUser({ params: { id: record.id } })
+      this.deleteUser({ params: { id: record.id } })
           .then(() => {
             // success deletion
             createAlert(AlertType.Success, `User ${record.name} deleted.`);
             // splice directly from the store state objectect
             (<Array<UserModel>>this.$store.state.api.users.data).splice(index, 1);
           })
-          .catch((err) => {
-            // error on delete
-            createAlert(
-              AlertType.Danger,
-              `Error deleting user ${record.id}: ${err}`
-            );
+          .catch((request) => {
+            let errors = request.response.data.errors;
+            for (const error in errors) {
+                createAlert(AlertType.Danger, `Error deleting "${record.name}": ${error}: ${errors[error]}`);
+            }
           });
   }
 

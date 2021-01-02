@@ -105,7 +105,7 @@ const Auth = namespace("auth");
 })
 export default class ProfileView extends Vue {
   getProfile!: () => void;
-  getUser!: (obj: Params) => void;
+  getUser!: (obj: Params) => AxiosPromise;
   deleteProfilePhoto!: () => AxiosPromise;
   deleteUserPhoto!: (obj: Params) => AxiosPromise;
 
@@ -124,7 +124,6 @@ export default class ProfileView extends Vue {
       router.push({name:'edit-profile'})
     else
       router.push({name:'edit-user', params: {id: this.userId || ''}});
-
   }
 
   deletePhoto() {
@@ -145,7 +144,20 @@ export default class ProfileView extends Vue {
     } else {
       this.isProfile = false;
       this.userId = this.$route.params.id;
-      this.getUser({params: {id: this.userId}});
+      this.getUser({params: {id: this.userId}})
+        .catch((request) => {
+          router.push({ name: "list-users" })
+            .then(() => {
+              if (request.response.data.errors) {
+                let errors = request.response.data.errors;
+                for (const error in errors) {
+                  createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${error}: ${errors[error]}`);
+                }
+              } else {
+                createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${request.response.data.message}`);
+              }
+          });
+        })
     }
   }
 

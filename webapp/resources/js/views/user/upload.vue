@@ -78,11 +78,11 @@ export default class UserUploadPhotoView extends Vue {
         }).then(res => {
             // go back
             router.go(-1);
-        }).catch(err => {
-            createAlert(
-                AlertType.Danger,
-                `Error uploading files ${this.file.name}: ${err}`
-            );
+        }).catch((request) => {
+            let errors = request.response.data.errors;
+                for (const error in errors) {
+                    createAlert(AlertType.Danger, `Error uploading photo (${this.file.name}): ${errors[error]}`);
+                }
         });
     }
 
@@ -90,11 +90,18 @@ export default class UserUploadPhotoView extends Vue {
         this.getUser({ params: { id: this.$route.params.id } }).then((result) => {
             if (this.authUser?.type == UserType.EMPLOYEE_MANAGER && result.data?.type == UserType.CUSTOMER)
                 router.go(-1);
-        }).catch((err) => {
-          createAlert(
-            AlertType.Danger,
-            `Error on fetching user ${this.$route.params.id}: ${err}`
-          );
+        }).catch((request) => {
+          router.push({ name: "list-users" })
+            .then(() => {
+              if (request.response.data.errors) {
+                let errors = request.response.data.errors;
+                  for (const error in errors) {
+                    createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${error}: ${errors[error]}`);
+                  }
+                } else {
+                  createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${request.response.data.message}`);
+              }
+          });
         })
     }
 }
