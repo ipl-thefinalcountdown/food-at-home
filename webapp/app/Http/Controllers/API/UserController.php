@@ -166,6 +166,16 @@ class UserController extends Controller
         ]);
     }
 
+    public function block(Request $request, User $user)
+    {
+        $this->validate($request, ['blocked' => 'required|boolean']);
+
+        $user->blocked = $request->blocked;
+        $user->save();
+
+        return response()->json($user);
+    }
+
     public static function validateOnUpdate(Request $request, User $user)
 	{
         $validator_assocArr = [

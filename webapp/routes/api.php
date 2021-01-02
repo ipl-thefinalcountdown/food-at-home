@@ -35,6 +35,9 @@ Route::middleware('auth:sanctum', 'user-manager')->group(function() {
     Route::post('/users/{user}/photo', 'UserController@photo');
     Route::delete('/users/{user}/photo', 'UserController@photoDelete');
 
+    // block/unblock a user route
+    Route::put('/users/{user}/block', 'UserController@block');
+
     // products routes
     Route::delete('/products/{product}', 'ProductController@delete')->name('delete-product');
     Route::post('/products/{product}', 'ProductController@put')->name('put-product');
