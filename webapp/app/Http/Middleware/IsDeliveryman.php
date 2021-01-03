@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class IsDeliverman
+class IsDeliveryman
 {
     /**
      * Handle an incoming request.

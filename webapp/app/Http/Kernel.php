@@ -60,7 +60,7 @@ class Kernel extends HttpKernel
         'user-manager' => \App\Http\Middleware\IsManager::class,
         'user-customer' => \App\Http\Middleware\IsCustomer::class,
         'user-cook' => \App\Http\Middleware\IsCook::class,
-        'user-deliverman' => \App\Http\Middleware\IsDeliverman::class,
+        'user-deliveryman' => \App\Http\Middleware\IsDeliveryman::class,
 
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
