@@ -5,13 +5,21 @@
         <searchable-table
           :items="items"
           :row-clicked="rowClicked"
+          :cart-clicked="cartClicked"
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
           :add-clicked="addClicked"
           :edit-clicked="editClicked"
           :delete-clicked="deleteClicked"
-        />
+        >
+
+        <!-- For price fields, lets consider euro -->
+        <template #cell(price)="data">
+            {{ data.item.price }} €
+        </template>
+
+        </searchable-table>
       </div>
     </div>
   </page-component>
@@ -32,6 +40,9 @@ import { AlertType, createAlert } from "../../utils/alert";
 import { Params, LaravelResponse } from "../../stores/api";
 import { AxiosPromise } from "axios";
 
+import { namespace } from "vuex-class";
+const Cart = namespace("cart");
+
 @Component({
   components: {
     PageComponent,
@@ -45,7 +56,7 @@ import { AxiosPromise } from "axios";
             id: p.id,
             name: p.name,
             type: p.type,
-            price: `${p.price} €`,
+            price: p.price,
           };
         });
       },
@@ -65,8 +76,15 @@ export default class ProductListView extends Vue {
   deleteProduct!: (obj: Params) => AxiosPromise;
   putProduct!: (obj: Params) => void;
 
+  @Cart.Action
+  public addCartProductAction!: (product: ProductModel) => void;
+
   filterText?: string = "";
   currentPage?: number | string;
+
+  cartClicked(record: ProductModel, index: number, event: Event) {
+    this.addCartProductAction(record);
+  }
 
   data() {
     let obj = this;

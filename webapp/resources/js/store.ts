@@ -7,6 +7,7 @@ Vue.use(Vuex)
 
 import api from "./stores/api"
 import auth from "./stores/auth"
+import cart from "./stores/cart"
 import axios from "axios"
 
 
@@ -22,6 +23,7 @@ if (token) {
 export default new Vuex.Store({
 	modules: {
 		api: <any>api,
-		auth: auth
+		auth: auth,
+		cart: cart,
 	}
 });

@@ -28,4 +28,19 @@ class OrderItem extends Model
         'unit_price',
         'sub_total_price'
     ];
+
+    /**
+     * The timestamps are created on insert or update
+     *
+     * @var boolean
+     */
+    public $timestamps = false;
+
+    /**
+     * Get the post that owns the comment.
+     */
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }
