@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\UserValidator;
+use App\Http\Helpers\OrdersQueue;
 use App\Http\Requests\UserCreateRequest;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -23,7 +25,18 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            $tokenResult = $request->user()->createToken('authToken')->plainTextToken;
+            $user = $request->user();
+            $tokenResult = $user->createToken('authToken')->plainTextToken;
+            $user->logged_at = Carbon::now();
+
+            if(is_null($user->available_at))
+                $user->available_at = Carbon::now();
+
+            $user->save();
+
+            if($user->type == 'EC')
+                OrdersQueue::reassignOrders();
+
             return response()->json([
                 'status_code' => 200,
                 'access_token' => $tokenResult,
@@ -40,6 +53,14 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
+        $user->logged_at = null;
+        $user->save();
+
+        if($user->type == 'EC')
+        {
+            OrdersQueue::removeAssignedOrders($user);
+            OrdersQueue::reassignOrders();
+        }
 
         $tokens = ($request->boolean('all'))
             ? $user->tokens()

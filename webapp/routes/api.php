@@ -39,9 +39,33 @@ Route::middleware('auth:sanctum', 'user-manager')->group(function() {
     Route::delete('/products/{product}', 'ProductController@delete')->name('delete-product');
     Route::post('/products/{product}', 'ProductController@put')->name('put-product');
     Route::post('/products', 'ProductController@post')->name('post-product');
+
+    Route::get('/orders', 'OrderController@listAll');
+    Route::post('/orders/{order}/cancel', 'OrderController@cancel');
+});
+
+Route::get('/test', 'OrderController@test');
+
+Route::middleware('auth:sanctum', 'user-cook')->group(function() {
+    Route::get('/cook/orders', 'OrderController@listCook');
+    Route::post('/cook/orders/{order}/prepare', 'OrderController@prepare');
+});
+
+Route::middleware('auth:sanctum', 'user-deliveryman')->group(function() {
+    Route::get('/deliveryman/orders', 'OrderController@listDeliverman');
+    Route::post('/deliveryman/orders/{order}/pickup', 'OrderController@pickup');
+    Route::post('/deliveryman/orders/{order}/deliver', 'OrderController@deliver');
+});
+
+Route::middleware('auth:sanctum', 'user-customer')->group(function () {
+    Route::post('/customer/orders', 'OrderController@create');
+    Route::get('/customer/orders', 'OrderController@listCustomer');
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    // get order
+    Route::get('/orders/{order}', 'OrderController@view');
+
     // get current user info
     Route::get('/user', 'UserController@profile');
     Route::put('/user', 'UserController@updateProfile');

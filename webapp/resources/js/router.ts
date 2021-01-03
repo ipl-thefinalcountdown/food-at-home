@@ -15,6 +15,10 @@ import UserAddEditView from './views/user/addEdit.vue'
 import UserUploadPhotoView from './views/user/upload.vue';
 
 import { UserType } from './models/user'
+import ProfileView from './views/auth/profile.vue'
+import CartView from './views/products/cart.vue'
+import OrderListView from './views/orders/list.vue'
+import OrderView from './views/orders/view.vue'
 
 Vue.use(VueRouter)
 
@@ -68,6 +72,12 @@ export default new VueRouter({
 		{ path: '/profile/', name: 'view-profile', component: UserView, beforeEnter: ifAuthenticated },
 		{ path: '/profile/upload/', name: 'upload-photo-profile', component: UserUploadPhotoView, beforeEnter: ifAuthenticated },
 		{ path: '/profile/edit/', name: 'edit-profile', component: UserAddEditView, beforeEnter: ifAuthenticated },
+		{ path: '/profile/orders', name: 'list-profile-orders', component: OrderListView, beforeEnter: authenticatedRole(UserType.CUSTOMER) },
+		{ path: '/cart/', name: 'products-cart', component: CartView, beforeEnter: authenticatedRole(UserType.CUSTOMER) },
+
+		// Orders
+		{ path: '/orders/', name: 'list-orders', component: OrderListView, beforeEnter: ifAuthenticated },
+		{ path: '/orders/:id', name: 'view-order', component: OrderView, beforeEnter: ifAuthenticated },
 
 		// Manager routes
 		{ path: '/users/', name: 'list-users', component: UserListView, beforeEnter: authenticatedRole(UserType.EMPLOYEE_MANAGER) },

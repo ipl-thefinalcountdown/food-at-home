@@ -52,4 +52,12 @@ class Order extends Model
         'D', // Delivered
         'C'  // Cancelled
     ];
+
+    /**
+     * Get the comments for the blog post.
+     */
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

@@ -1,9 +1,14 @@
 <template>
   <div>
     <div class="d-flex flex-row-reverse bd-highlight">
-      <a class="btn btn-danger" v-if="deleteClicked" @click.prevent="deleteClicked" role="button">Delete</a>
-      <div class="pr-1">
-        <a class="btn btn-warning" v-if="editClicked" @click.prevent="editClicked" role="button">Edit</a>
+        <div v-if="deleteClicked" class="pr-1">
+        <a class="btn btn-danger" @click.prevent="deleteClicked" role="button">Delete</a>
+      </div>
+      <div v-if="editClicked" class="pr-1">
+        <a class="btn btn-warning" @click.prevent="editClicked" role="button">Edit</a>
+      </div>
+      <div v-if="customClicked" class="pr-1">
+          <a :class="`btn btn-${customType}`" @click.prevent="customClicked" role="button">{{ customText }}</a>
       </div>
     </div>
     <b-table
@@ -37,7 +42,10 @@ export default Vue.extend({
         items: Array,
         awaitingItems: Boolean,
         deleteClicked: Function,
-        editClicked: Function
+        editClicked: Function,
+        customClicked: Function,
+        customText: String,
+        customType: String
     }
 })
 </script>
