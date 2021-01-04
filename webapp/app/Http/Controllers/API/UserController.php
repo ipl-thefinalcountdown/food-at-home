@@ -175,7 +175,7 @@ class UserController extends Controller
 
     private function deleteAndSavePhoto($photo, User $user)
     {
-        deletePhoto($photo, $user);
-        return savePhoto($photo);
+        $this->deletePhoto($photo, $user);
+        return $this->savePhoto($photo);
     }
 }
