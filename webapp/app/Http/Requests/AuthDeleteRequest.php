@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Http\Requests\AuthDeleteRequest;
 
-class UserDeleteRequest extends AuthDeleteRequest
+class AuthDeleteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,7 +13,7 @@ class UserDeleteRequest extends AuthDeleteRequest
      */
     public function authorize()
     {
-        return parent::authorize() && $this->user != 'C';
+        return !($this->user()->type == 'EM' && $this->user()->id == $this->user->id);
     }
 
     /**
