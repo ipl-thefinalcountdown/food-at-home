@@ -74,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/user', 'UserController@updateProfile');
     Route::post('/user/photo', 'UserController@photoProfile');
     Route::delete('/user/photo', 'UserController@photoDeleteProfile');
+    Route::delete('/user', 'UserController@deleteProfile');
 
     Route::post('/logout', 'Auth\AuthController@logout')->name('logout');
 });
