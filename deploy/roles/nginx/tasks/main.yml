@@ -7,9 +7,9 @@
       #- nginx-plus-module-brotli
     state: present
 
-- name: create group http
+- name: create group www-data
   group:
-    name: http
+    name: www-data
     state: present
 
 - name: install nginx.service snippet
@@ -96,8 +96,8 @@
     state: directory
     path: "{{ letsencrypt_validation_dir }}"
     owner: root
-    group: http
-    mode: 0750
+    group: www-data
+    mode: 0755
 
 - name: install logrotate config
   copy:
