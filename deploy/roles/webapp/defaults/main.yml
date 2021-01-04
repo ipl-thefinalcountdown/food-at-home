@@ -1,9 +1,14 @@
 ---
 
 webapp_domain: 'food-at-home.lsferreira.net'
+webapp_domain_webmaster: 'webmaster@lsferreira.net'
 webapp_dir: '/srv/http/webapp'
+websocket_dir: '/srv/http/websockets'
 
 webapp_db_host: 'localhost'
 
 webapp_user: 'webapp'
 webapp_socket: '/run/php-fpm/{{ webapp_user }}.socket'
+
+webapp_nginx_conf: /etc/nginx/nginx.d/webapp.conf
+webapp_websockets_url: http://localhost:8888/socket.io/

@@ -1,0 +1,10 @@
+[Unit]
+Description=Start webapp
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={{ webapp_user }}
+WorkingDirectory={{ webapp_dir }}/websockets
+ExecStart=/usr/bin/npm run start

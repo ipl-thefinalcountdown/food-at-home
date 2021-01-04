@@ -5,7 +5,7 @@ daemonize = no
 [{{ webapp_user }}]
 listen = {{ webapp_socket }}
 listen.owner = {{ webapp_user }}
-listen.group = http
+listen.group = www-data
 listen.mode = 0660
 
 pm = dynamic
