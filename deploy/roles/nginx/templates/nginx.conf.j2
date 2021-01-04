@@ -73,6 +73,11 @@ http {
 
     server_tokens off;
 
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
     index index.php index.html index.htm;
 
     access_log syslog:server=unix:/dev/log,nohostname,tag=nginx_http main;
