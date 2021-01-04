@@ -25,15 +25,17 @@ class AuthPutRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'name' => 'sometimes|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
             'email' => [
-                'required',
+                'sometimes',
                 'email',
                 Rule::unique('users')->ignoreModel($this->user())
             ],
-            'password' => 'nullable|min:3',
-            'photo' => 'nullable|image|max:8192',
-            'type' => 'required|in:EC,ED,EM',
+            'password' => 'sometimes|min:3',
+            'photo' => 'sometimes|nullable|image|max:8192',
+            'address' => 'sometimes|string',
+            'nif' => 'sometimes|nullable|digits:9',
+            'phone' => 'sometimes|max:20|min:9',
         ];
     }
 
@@ -46,7 +48,10 @@ class AuthPutRequest extends FormRequest
             'password.min' => 'Password must have a minimum of 3 characters',
             'photo.image' => 'Photo must be an image',
             'photo.max' => 'Photo must not be higher than 8192',
-            'type.in' => 'Type must be one of (EC, ED, EM)',
+            'phone.alpha_num' => 'Phone must have alpha numeric characters',
+            'phone.min' => 'Phone must have at least 9 digits',
+            'phone.max' => 'Phone must have a maximum of 20 alpha numeric characters',
+            'nif.digits' => 'Nif must have 9 digits',
         ];
     }
 }

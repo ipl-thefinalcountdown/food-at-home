@@ -25,25 +25,22 @@ class ProductPutRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'price' => 'required|numeric|max:999999.99|min:0.00',
-            'type' => 'in:drink,dessert,hot dish,cold dish',
-            'description' => 'required',
-            'photo_url' => 'image|max:8192'
+            'name' => 'sometimes|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'price' => 'sometimes|numeric|max:999999.99|min:0.00',
+            'type' => 'sometimes|in:drink,dessert,hot dish,cold dish',
+            'description' => 'sometimes|string',
+            'photo_url' => 'sometimes|image|max:8192'
         ];
     }
 
     public function messages()
     {
         return [
-            'name.required' => 'A name is required',
             'name.regex' => 'Name contains invalid characters',
-            'price.required' => 'Price is required',
             'price.numeric' => 'Price must be a number',
             'price.max' => 'Price must be bellow 999999.99',
             'price.min' => 'Price can not be negative',
             'type.in' => 'Product type must be one of (drink, dessert, hot dish, cold dish)',
-            'description.required' => 'Description is required, please insert an empty text for no description',
             'photo_url.image' => 'Photo must be an image',
             'photo_url.max' => 'Maximum photo size is 8192'
         ];

@@ -20,15 +20,15 @@ class UserPutRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
+            'name' => 'sometimes|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
             'email' => [
-                'required',
+                'sometimes',
                 'email',
                 Rule::unique('users')->ignoreModel($this->user)
             ],
-            'password' => 'nullable|min:3',
-            'photo' => 'nullable|image|max:8192',
-            'type' => 'required|in:EC,ED,EM',
+            'password' => 'sometimes|min:3',
+            'photo' => 'sometimes|image|max:8192',
+            'type' => 'sometimes|in:EC,ED,EM',
         ];
     }
 }

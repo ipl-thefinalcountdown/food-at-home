@@ -8,7 +8,31 @@
           placeholder="Enter email"
           v-model="form.email"
         />
-        <form-searchable-select label="User type" placeholder="Select the user type" v-model="form.type" :options="types" />
+        <form-field
+          v-if="form.type == 'C'"
+          label="Address"
+          placeholder="Enter address"
+          v-model="form.address"
+        />
+        <form-field
+          v-if="form.type == 'C'"
+          label="Phone Number"
+          placeholder="Enter phone number"
+          v-model="form.phone"
+        />
+        <div class="form-group">
+            <label for="NIF">NIF</label>
+            <b-input
+            v-if="form.type == 'C'"
+            label="NIF"
+            placeholder="Enter NIF"
+            v-model="form.nif"
+            :required="false"
+            class="form-control"
+            name="NIF"
+            />
+        </div>
+        <form-searchable-select v-if="!isProfile" label="User type" placeholder="Select the user type" v-model="form.type" :options="types" />
         <div class="form-group">
           <label for="password">Password</label>
           <b-input
@@ -138,6 +162,7 @@ export default class UserAddEditView extends Vue {
     }
 
     if (this.isEdit) {
+      if (this.authUser.type === UserType.CUSTOMER && !this.form.nif) this.form.nif = null;
       (this.isProfile ? this.updateProfile : this.updateUser)({
         params: {
           id: this.user?.id,
@@ -185,11 +210,21 @@ export default class UserAddEditView extends Vue {
               router.go(-1);
           }
 
+          let optional =
+            this.user?.type == UserType.CUSTOMER
+              ? {
+                  address: this.user?.address,
+                  phone: this.user?.phone,
+                  nif: this.user?.nif,
+                }
+              : {};
+
           this.form = {
             id: this.user?.id,
             name: this.user?.name,
             email: this.user?.email,
             type: this.user?.type,
+            ...optional,
           };
 
           this.itemLoaded = true;

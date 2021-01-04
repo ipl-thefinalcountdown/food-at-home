@@ -12,7 +12,7 @@ export interface UserModel {
 	address?: string;
 	password?: string;
 	phone?: string;
-	nif?: number;
+	nif?: number | null;
 	photo_url?: string;
 	blocked?: number | boolean;
 
