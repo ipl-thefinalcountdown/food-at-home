@@ -8,6 +8,12 @@
       - nodejs
       - composer
 
+- name: create ssl cert
+  command: certbot certonly --email {{ webapp_domain_webmaster }} --agree-tos --rsa-key-size 4096 --renew-by-default --webroot -w {{ letsencrypt_validation_dir }} -d '{{ webapp_domain }}'
+  args:
+    creates: '/etc/letsencrypt/live/{{ webapp_domain }}/fullchain.pem'
+  when: 'webapp_domain is defined'
+
 - name: make webapp user
   user:
     name: "{{ webapp_user }}"
@@ -19,7 +25,7 @@
     path: "{{ webapp_dir }}"
     state: directory
     owner: "{{ webapp_user }}"
-    group: http
+    group: www-data
     mode: 0775
 
 - name: copy webapp
@@ -30,7 +36,7 @@
   become_user: "{{ webapp_user }}"
   register: release
 
-- name: copy webbsockets
+- name: copy websockets
   copy:
     src: app/websockets
     dest: "{{ webapp_dir }}"
@@ -71,10 +77,65 @@
   become: true
   become_user: "{{ webapp_user }}"
 
+- name: build frontend
+  command: npm run prod
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
 - name: install websockets dependencies
   command: npm install
   args:
     chdir: "{{ webapp_dir }}/websockets"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: install webapp websockets unit
+  template:
+    src: "webapp-websockets.service.j2"
+    dest: "/etc/systemd/system/webapp-websockets.service"
+    owner: root
+    group: root
+    mode: 0644
+  notify: daemon reload
+
+- name: set up laravel environment
+  template:
+    src: env.j2
+    dest: "{{ webapp_dir }}/webapp/.env"
+    owner: "{{ webapp_user }}"
+    group: "{{ webapp_user }}"
+    mode: 0644
+  become: true
+  become_user: "{{ webapp_user }}"
+  register: release
+
+- name: generate app key
+  command: php artisan key:generate
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: migrate database
+  shell: echo 'yes' | php artisan migrate
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: link storage
+  command: php artisan storage:link
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
+  become: true
+  become_user: "{{ webapp_user }}"
+
+- name: seed database
+  shell: echo "yes\n1" | php artisan db:seed
+  args:
+    chdir: "{{ webapp_dir }}/webapp"
   become: true
   become_user: "{{ webapp_user }}"
 
@@ -84,13 +145,21 @@
     dest: "{{ webapp_nginx_conf }}"
     owner: root
     group: root
-    mode: 644
+    mode: 0644
   notify: reload nginx
   tags: ['nginx']
 
 - name: make nginx log dir
   file:
     path: "/var/log/nginx/{{ webapp_domain }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: make php-fpm dir
+  file:
+    path: "/etc/php/php-fpm.d/"
     state: directory
     owner: root
     group: root
