@@ -2,7 +2,7 @@
   <page-component>
     <div class="container">
       <div class="justify-content-center">
-        <searchable-table v-if="authUser.type === userType"
+        <searchable-table v-if="isAuthenticated && authUser.type === userType"
           :items="items"
           :row-clicked="rowClicked"
           :filter-changed="filterChanged"
@@ -78,6 +78,9 @@ export default class ProductListView extends Vue {
 
   filterText?: string = "";
   currentPage?: number | string;
+
+  @Auth.Getter
+  public isAuthenticated!: boolean;
 
   @Auth.Getter
   public authUser!: UserModel
