@@ -18,6 +18,7 @@ use App\Http\Requests\UserPhotoRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\UserDeleteRequest;
 use App\Http\Requests\AuthDeleteRequest;
+use App\Http\Requests\AuthPutRequest;
 
 class UserController extends Controller
 {
@@ -73,25 +74,34 @@ class UserController extends Controller
 		}
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(AuthPutRequest $request)
 	{
-		return $this->update($request, $request->user());
+        $request->validated();
+        $user = $request->user();
+        $user->fill($request->only('name', 'email', 'type'));
+
+		if($request->has('password'))
+			$user->password = Hash::make($request->password);
+
+		if ($request->hasFile('photo'))
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
+
+        $user->save();
+		return response()->json($user);
 	}
 
 	public function update(UserPutRequest $request, User $user)
 	{
 		$request->validated();
-
 		$user->fill($request->only('name', 'email', 'type'));
 
 		if($request->has('password'))
 			$user->password = Hash::make($request->password);
 
 		if ($request->hasFile('photo'))
-            $user->photo_url = deleteAndSavePhoto($request->photo, $user);
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
 
         $user->save();
-
 		return response()->json($user);
     }
 
@@ -146,28 +156,6 @@ class UserController extends Controller
         $user->save();
 
         return response()->json($user);
-    }
-
-    public static function validateOnUpdate(Request $request, User $user)
-	{
-        $validator_assocArr = [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'email' => ['required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->ignoreModel($user)
-            ],
-            'photo' => 'nullable|image|max:8192'
-        ];
-
-        if($user->type == 'C')
-        {
-            $validator_assocArr += [
-                'address' => 'required',
-                'phone' => 'required',
-                'nif' => 'nullable|numeric|digits:9'
-            ];
-        }
-
-		return Validator::make($request->all(), $validator_assocArr);
     }
 
     private function deletePhoto($photo, User $user)
