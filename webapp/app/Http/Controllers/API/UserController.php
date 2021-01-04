@@ -16,6 +16,7 @@ use App\Http\Requests\UserPutRequest;
 use App\Http\Requests\PhotoRequest;
 use App\Http\Requests\UserPhotoRequest;
 use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserDeleteRequest;
 
 class UserController extends Controller
 {
@@ -124,21 +125,10 @@ class UserController extends Controller
         $user->save();
     }
 
-    public function delete(Request $request, User $user)
+    public function delete(UserDeleteRequest $request, User $user)
     {
-        if($request->user()->type == 'EM' && $request->user()->id == $user->id)
-        {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Cant delete yourself!',
-            ], 400);
-        }
-
+        $request->validated();
         $user->delete();
-        return response()->json([
-            'status_code' => 200,
-            'message' => 'User deleted!'
-        ]);
     }
 
     public function block(Request $request, User $user)
