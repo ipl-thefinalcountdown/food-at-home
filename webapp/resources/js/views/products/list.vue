@@ -2,7 +2,7 @@
   <page-component>
     <div class="container">
       <div class="justify-content-center">
-        <searchable-table v-if="authUser.type === userType"
+        <searchable-table v-if="isAuthenticated && authUser.type === userType"
           :items="items"
           :row-clicked="rowClicked"
           :cart-clicked="(isAuthenticated && authUser.type == 'C') ? cartClicked : undefined"

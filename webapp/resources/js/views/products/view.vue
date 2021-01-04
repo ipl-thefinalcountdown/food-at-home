@@ -2,10 +2,23 @@
   <page-component>
     <div class="container">
       <b-row cols="1">
-        <b-col>
+        <b-col v-if="!isAuthenticated || authUser.type !== userTypeManager">
           <item-details
             :items="items"
             :awaiting-items="pending.product"
+          >
+            <template #cell(photo)="data">
+              <b-img v-if="data.value" thumbnail rounded :src="`/storage/${data.value}`" fluid alt="Product photo"></b-img>
+              <div class="text-secondary" v-else>No photo</div>
+            </template>
+          </item-details>
+        </b-col>
+        <b-col v-else>
+          <item-details
+            :items="items"
+            :awaiting-items="pending.product"
+            :edit-clicked="editClicked"
+            :delete-clicked="deleteClicked"
           >
             <template #cell(photo)="data">
               <b-img v-if="data.value" thumbnail rounded :src="`/storage/${data.value}`" fluid alt="Product photo"></b-img>
@@ -30,7 +43,7 @@ import ItemDetails from "../../components/item/ItemDetails.vue";
 import SearchableTable from "../../components/SearchableTable.vue";
 
 import { mapState, mapActions } from "vuex";
-import { UserModel } from "../../models/user";
+import { UserModel, UserType } from "../../models/user";
 
 import { AlertType, createAlert } from "../../utils/alert";
 import { deSnakeCase } from "../../utils/string";
@@ -38,6 +51,9 @@ import { deSnakeCase } from "../../utils/string";
 import { LaravelResponse, Params } from "../../stores/api";
 import router from "../../router";
 import { ProductModel } from "../../models/product";
+import { namespace } from "vuex-class";
+
+const Auth = namespace("auth");
 
 
 @Component({
@@ -61,16 +77,48 @@ import { ProductModel } from "../../models/product";
     pending: (state: any) => state.api.pending,
   }),
   methods: {
-    ...mapActions(["getProduct"]),
+    ...mapActions([
+        "getProduct",
+        "putProduct",
+        "deleteProduct",
+    ]),
   },
 })
 export default class ProductView extends Vue {
   getProduct!: (obj: Params) => AxiosPromise;
+  putProduct!: (obj: Params) => void;
+  deleteProduct!: (obj: Params) => AxiosPromise;
 
   productId?: number | string;
 
+  @Auth.Getter
+  private isAuthenticated!: boolean;
+
+  @Auth.Getter
+  private authUser!: UserModel;
+
+  userTypeManager: string = UserType.EMPLOYEE_MANAGER;
+
+  items?: any;
+
   data() {
     return {}
+  }
+
+  editClicked() {
+      router.push({ name: "put-product", params: { id: String(this.productId) } });
+  }
+
+  deleteClicked() {
+      this
+        .deleteProduct({ params: { id: String(this.productId) } })
+        .then(() => {
+            router.push({ name: "list-products" }).then(() => {
+                createAlert(AlertType.Success, `Product "${this.items[0].name}" deleted successfuly!`);
+            })
+        }).catch((err) => {
+            createAlert(AlertType.Danger, `Could not delete product "${this.items[0].name}": ${err}`)
+        });
   }
 
   mounted() {
