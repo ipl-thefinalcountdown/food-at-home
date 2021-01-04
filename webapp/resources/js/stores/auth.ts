@@ -32,6 +32,12 @@ export class Auth extends VuexModule {
 	public setAuthLogout(): void {
 		this.status = '';
 		this.token = '';
+    }
+
+    @Mutation
+	public setAuthDelete(): void {
+		this.status = '';
+		this.token = '';
 	}
 
   @Action
@@ -69,6 +75,23 @@ export class Auth extends VuexModule {
 
 			//query logout
 			axios({ url: 'logout', method: 'POST' }).then(() => {
+				// remove the axios default header
+				delete axios.defaults.headers.common['Authorization']
+			})
+
+			localStorage.removeItem('user-token')
+			localStorage.removeItem('user-data')
+			resolve()
+		})
+    }
+
+    @Action
+	public makeAuthDelete(): Promise<void> {
+		return new Promise((resolve, reject) => {
+            this.context.commit('setAuthDelete')
+
+            //query delete
+			axios({ url: 'user', method: 'DELETE' }).then(() => {
 				// remove the axios default header
 				delete axios.defaults.headers.common['Authorization']
 			})

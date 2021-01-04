@@ -2,7 +2,7 @@
   <page-component>
     <div class="container">
       <b-row cols="1">
-        <b-col v-if="items[0].type === userType">
+        <b-col v-if="items[0].type === userTypeCustomer && authUser.type === userTypeManager">
           <item-details
             :items="items"
             :awaiting-items="pending.user"
@@ -15,11 +15,28 @@
             </template>
           </item-details>
         </b-col>
+        <b-col v-else-if="authUser.type === userTypeManager && items[0].id === authUser.id">
+          <item-details
+            :items="items"
+            :awaiting-items="pending.user"
+            :editClicked="editClicked"
+          >
+            <template #cell(photo)="data">
+              <div>
+                <b-img v-if="data.value" thumbnail rounded :src="`/storage/fotos/${data.value}`" fluid alt="Product photo"></b-img>
+                <span class="text-secondary" v-else>No photo</span>
+                <b-button :to="uploadRoute" variant="outline-secondary" size="sm">Upload</b-button>
+                <b-button v-if="data.value" @click.prevent="deletePhoto" variant="outline-danger" size="sm">Delete</b-button>
+              </div>
+            </template>
+          </item-details>
+        </b-col>
         <b-col v-else>
           <item-details
             :items="items"
             :awaiting-items="pending.user"
             :edit-clicked="editClicked"
+            :delete-clicked="deleteClicked"
           >
             <template #cell(photo)="data">
               <div>
@@ -92,7 +109,8 @@ const Auth = namespace("auth");
         "getProfile",
         "getUser",
         "deleteProfilePhoto",
-        "deleteUserPhoto"
+        "deleteUserPhoto",
+        "deleteProfile"
       ]),
   },
   watch: {
@@ -108,22 +126,48 @@ export default class ProfileView extends Vue {
   getUser!: (obj: Params) => AxiosPromise;
   deleteProfilePhoto!: () => AxiosPromise;
   deleteUserPhoto!: (obj: Params) => AxiosPromise;
+  deleteProfile!: () => AxiosPromise;
+  deleteUser!: (obj: Params) => AxiosPromise;
 
   @Auth.Getter
   private isAuthenticated!: boolean;
   @Auth.Getter
   public authUser!: UserModel;
+  @Auth.Action
+  private makeAuthDelete!: () => Promise<void>;
 
   isProfile?: boolean;
   userId?: string;
 
-  userType: string = UserType.CUSTOMER;
+  items?: any;
+
+  userTypeCustomer: string = UserType.CUSTOMER;
+  userTypeManager: string = UserType.EMPLOYEE_MANAGER;
 
   editClicked() {
     if(this.isProfile)
       router.push({name:'edit-profile'})
     else
       router.push({name:'edit-user', params: {id: this.userId || ''}});
+  }
+
+  deleteClicked() {
+    if (this.isProfile)
+      this.makeAuthDelete().then(() => {
+          router.push('/');
+      });
+    else
+      this.deleteUser({ params: { id: this.userId } })
+          .then(() => {
+            // success deletion
+            createAlert(AlertType.Success, `User ${this.items[0].name} deleted.`);
+          })
+          .catch((request) => {
+            let errors = request.response.data.errors;
+            for (const error in errors) {
+                createAlert(AlertType.Danger, `Error deleting "${this.items[0].name}": ${error}: ${errors[error]}`);
+            }
+          });
   }
 
   deletePhoto() {
