@@ -33,6 +33,9 @@ class User extends Authenticatable
         'password',
         'photo_url',
         'type',
+        'address',
+        'nif',
+        'phone',
     ];
 
     /**

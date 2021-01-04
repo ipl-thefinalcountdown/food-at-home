@@ -53,7 +53,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
 
         if ($request->has('photo'))
-            $user->photo = savePhoto($request->photo_url);
+            $user->photo = savePhoto($request->photo);
 
         $user->save();
 
@@ -78,13 +78,20 @@ class UserController extends Controller
 	{
         $request->validated();
         $user = $request->user();
-        $user->fill($request->only('name', 'email', 'type'));
+        $user->fill($request->only('name', 'email'));
 
 		if($request->has('password'))
 			$user->password = Hash::make($request->password);
 
 		if ($request->hasFile('photo'))
-            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
+
+        if ($request->user()->type == 'C')
+        {
+            $customer = Customer::find($user->id);
+            $customer->fill($request->only('nif', 'phone', 'address'));
+            $customer->save();
+        }
 
         $user->save();
 		return response()->json($user);
@@ -99,7 +106,7 @@ class UserController extends Controller
 			$user->password = Hash::make($request->password);
 
 		if ($request->hasFile('photo'))
-            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
 
         $user->save();
 		return response()->json($user);
@@ -109,21 +116,21 @@ class UserController extends Controller
     {
         $request->validated();
         $user = $request->user();
-        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+        $user->photo_ur = $this->deleteAndSavePhoto($request->photo, $user);
         $user->save();
     }
 
     public function photo(UserPhotoRequest $request, User $user)
     {
         $request->validated();
-        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
         $user->save();
     }
 
     public function photoDelete(UserRequest $request, User $user)
     {
         $request->validated();
-        $this->deletePhoto($user);
+        $this->deletePhoto($user->photo_url, $user);
         $user->photo_url = null;
         $user->save();
     }
@@ -131,7 +138,7 @@ class UserController extends Controller
     public function photoDeleteProfile(Request $request)
     {
         $user = $request->user();
-        $this->deletePhoto($user);
+        $this->deletePhoto($user->photo_url, $user);
         $user->photo_url = null;
         $user->save();
     }
@@ -139,6 +146,7 @@ class UserController extends Controller
     public function delete(UserDeleteRequest $request, User $user)
     {
         $request->validated();
+        $user->tokens()->delete();
         $user->delete();
     }
 
@@ -158,7 +166,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    private function deletePhoto(User $user)
+    private function deletePhoto($photo, User $user)
     {
         if(!is_null($user->photo_url))
         {
@@ -175,7 +183,7 @@ class UserController extends Controller
 
     private function deleteAndSavePhoto($photo, User $user)
     {
-        $this->deletePhoto($user);
+        $this->deletePhoto($photo, $user);
         return $this->savePhoto($photo);
     }
 }
