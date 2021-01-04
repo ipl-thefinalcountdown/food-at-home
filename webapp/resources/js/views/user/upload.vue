@@ -23,7 +23,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import { mapState, mapActions } from "vuex";
-import axios from "axios";
+import axios, { AxiosPromise } from "axios";
 
 import PageComponent from "../../components/Page.vue";
 import ItemEdit from "../../components/item/ItemAddEdit.vue";
@@ -35,19 +35,37 @@ import { AlertType, createAlert } from "../../utils/alert";
 import { Params } from "../../stores/api";
 
 import router from "../../router"
+import { UserModel, UserType } from "../../models/user";
+import { namespace } from "vuex-class";
+
+const Auth = namespace("auth");
 
 @Component({
   components: {
     PageComponent,
     ItemEdit
   },
+
+  methods: {
+    ...mapActions([
+      "getUser",
+    ]),
+  },
 })
 export default class UserUploadPhotoView extends Vue {
-    file?: any = null
+    getUser!: (obj?: Params) => AxiosPromise;
+
+    file?: any = null;
+
+    @Auth.Getter
+    private isAuthenticated!: boolean;
+
+    @Auth.Getter
+    public authUser!: UserModel;
 
     onSubmit() {
         let formData = new FormData();
-        formData.append('photo', this.file);
+        formData.append('photo_url', this.file);
         axios({
             url: (this.$route.params.id)
                 ? `users/${this.$route.params.id}/photo`
@@ -60,12 +78,32 @@ export default class UserUploadPhotoView extends Vue {
         }).then(res => {
             // go back
             router.go(-1);
-        }).catch(err => {
-            createAlert(
-                AlertType.Danger,
-                `Error uploading files ${this.file.name}: ${err}`
-            );
+        }).catch((request) => {
+            let errors = request.response.data.errors;
+                for (const error in errors) {
+                    createAlert(AlertType.Danger, `Error uploading photo (${this.file.name}): ${errors[error]}`);
+                }
         });
+    }
+
+    mounted() {
+        if (this.$route.params.id)
+            this.getUser({ params: { id: this.$route.params.id } }).then((result) => {
+                if (this.authUser?.type == UserType.EMPLOYEE_MANAGER && result.data?.type == UserType.CUSTOMER)
+                    router.go(-1);
+            }).catch((request) => {
+            router.push({ name: "list-users" })
+                .then(() => {
+                if (request.response.data.errors) {
+                    let errors = request.response.data.errors;
+                    for (const error in errors) {
+                        createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${error}: ${errors[error]}`);
+                    }
+                    } else {
+                    createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${request.response.data.message}`);
+                    }
+                });
+            })
     }
 }
 </script>

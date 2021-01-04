@@ -93,7 +93,11 @@ const api : Store = new Vapi({
 	.put({
 		action: "updateProfile",
 		path: (opt : ParamsOptions) => `/user`
-	})
+    })
+    .put({
+        action: "blockUser",
+        path: (opt : ParamsOptions) => `/users/${opt.id}/block`
+    })
 	.delete({
 		action: "deleteProfilePhoto",
 		path: (opt : ParamsOptions) => `/user/photo`
@@ -105,7 +109,11 @@ const api : Store = new Vapi({
 	.delete({
 		action: "deleteUser",
 		path: (opt : ParamsOptions) => `/users/${opt.id}`
-	})
+    })
+    .delete({
+        action: "deleteProfile",
+        path: (opt : ParamsOptions) => `/user`
+    })
 	.post({
 		action: "registerUser",
 		path: (opt: ParamsOptions) => `/register`

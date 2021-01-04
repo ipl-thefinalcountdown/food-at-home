@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UserCreateRequest extends FormRequest
+class UserPostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,7 +13,6 @@ class UserCreateRequest extends FormRequest
      */
     public function authorize()
     {
-        // authorization is made on route and controller level
         return true;
     }
 
@@ -25,25 +23,25 @@ class UserCreateRequest extends FormRequest
      */
     public function rules()
     {
-        $validator_assocArr = [
+        return [
             'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:3',
             'photo' => 'nullable|image|max:8192',
-            'type' => [
-                'required',
-                Rule::in(['C', 'EC', 'EM', 'ED']),
-            ]
+            'type' => 'in:EC,ED,EM',
         ];
+    }
 
-        if($this->has('type') && $this->type == 'C')
-        {
-            $validator_assocArr += [
-                'address' => 'required',
-                'phone' => 'required',
-                'nif' => 'nullable|numeric|digits:9'
-            ];
-        }
-        return $validator_assocArr;
+    public function messages()
+    {
+        return [
+            'name.regex' => 'Invalid name format',
+            'email.email' => 'Invalid email',
+            'email.unique' => 'A registed user already has the same email',
+            'password.min' => 'Password must have a minimum of 3 characters',
+            'photo.image' => 'Photo must be an image',
+            'photo.max' => 'Photo must not be higher than 8192',
+            'type.in' => 'Type must be one of (EC, ED, EM)',
+        ];
     }
 }

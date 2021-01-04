@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UserPostRequest;
+use App\Http\Requests\UserPutRequest;
+use App\Http\Requests\PhotoRequest;
+use App\Http\Requests\UserPhotoRequest;
+use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserDeleteRequest;
+use App\Http\Requests\AuthDeleteRequest;
+use App\Http\Requests\AuthPutRequest;
 
 class UserController extends Controller
 {
@@ -35,7 +43,22 @@ class UserController extends Controller
                 ? $query->paginate()
                 : $query->get()
         );
-	}
+    }
+
+    public function create(UserPostRequest $request)
+    {
+        $validated = $request->validated();
+        $user = new User();
+        $user->fill($request->only('name', 'email', 'type'));
+        $user->password = Hash::make($request->password);
+
+        if ($request->has('photo'))
+            $user->photo = savePhoto($request->photo_url);
+
+        $user->save();
+
+        return response()->json($user);
+    }
 
 	public function view(User $user)
 	{
@@ -51,155 +74,108 @@ class UserController extends Controller
 		}
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(AuthPutRequest $request)
 	{
-		return $this->update($request, $request->user());
-	}
-
-	public function update(Request $request, User $user)
-	{
-        if($request->user()->type == 'EM' && $user->type == 'C')
-        {
-            return response()->json([
-                'status_code' => 403,
-                'message' => 'Forbidden',
-            ], 403);
-        }
-
-		$validator = UserController::validateOnUpdate($request, $user);
-
-        if($validator->fails()) {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => $validator->errors()
-            ], 400);
-		}
-
-		$user->fill($request->only('name', 'email'));
+        $request->validated();
+        $user = $request->user();
+        $user->fill($request->only('name', 'email', 'type'));
 
 		if($request->has('password'))
 			$user->password = Hash::make($request->password);
 
-		if($user->type == 'C')
-		{
-			$customer = Customer::find($user->id);
-			$customer->fill($request->only('address', 'phone', 'nif'));
-			$customer->save();
-		}
-
-		if ($request->hasFile('photo')) {
-            if(!is_null($user->photo_url))
-            {
-                $path = 'public/fotos/'.$user->photo_url;
-                if(Storage::exists($path))
-                    Storage::delete($path);
-            }
-
-            $path = $request->photo->store('public/fotos');
-            $user->photo_url = basename($path);
-        }
+		if ($request->hasFile('photo'))
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
 
         $user->save();
+		return response()->json($user);
+	}
 
+	public function update(UserPutRequest $request, User $user)
+	{
+		$request->validated();
+		$user->fill($request->only('name', 'email', 'type'));
+
+		if($request->has('password'))
+			$user->password = Hash::make($request->password);
+
+		if ($request->hasFile('photo'))
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+
+        $user->save();
 		return response()->json($user);
     }
 
-    public function photoProfile(Request $request)
+    public function photoProfile(PhotoRequest $request)
     {
-        return $this->photo($request, $request->user());
-    }
-
-    public function photo(Request $request, User $user)
-    {
-        $validator = Validator::make($request->all(), [
-            'photo' => 'required|image|max:8192'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => $validator->errors()
-            ], 400);
-        }
-
-        if(!is_null($user->photo_url))
-        {
-            $path = 'public/fotos/'.$user->photo_url;
-            if(Storage::exists($path))
-                Storage::delete($path);
-        }
-
-        $path = $request->photo->store('public/fotos');
-        $user->photo_url = basename($path);
+        $request->validated();
+        $user = $request->user();
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
         $user->save();
-
-		return response()->json([
-            'status_code' => 200,
-            'message' => 'Upload successful'
-        ]);
     }
 
-    public function photoDelete(User $user)
+    public function photo(UserPhotoRequest $request, User $user)
     {
-        if(!is_null($user->photo_url))
-        {
-            $path = 'public/fotos/'.$user->photo_url;
-            if(Storage::exists($path))
-                Storage::delete($path);
-        }
+        $request->validated();
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
+        $user->save();
+    }
 
+    public function photoDelete(UserRequest $request, User $user)
+    {
+        $request->validated();
+        $this->deletePhoto($user);
         $user->photo_url = null;
         $user->save();
-
-		return response()->json([
-            'status_code' => 200,
-            'message' => 'Photo deleted!'
-        ]);
     }
 
     public function photoDeleteProfile(Request $request)
     {
-        $this->photoDelete($request->user());
+        $user = $request->user();
+        $this->deletePhoto($user);
+        $user->photo_url = null;
+        $user->save();
     }
 
-    public function delete(Request $request, User $user)
+    public function delete(UserDeleteRequest $request, User $user)
     {
-        if($request->user()->type == 'EM' && $request->user()->id == $user->id)
-        {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Cant delete yourself!',
-            ], 400);
-        }
-
+        $request->validated();
         $user->delete();
-        return response()->json([
-            'status_code' => 200,
-            'message' => 'User deleted!'
-        ]);
     }
 
-    public static function validateOnUpdate(Request $request, User $user)
-	{
-        $validator_assocArr = [
-            'name' => 'required|regex:/^[A-Za-záàâãéèêíóôõúçÁÀÂÃÉÈÍÓÔÕÚÇ ]+$/',
-            'email' => ['required', 'string', 'email', 'max:255',
-                Rule::unique('users', 'email')->ignoreModel($user)
-            ],
-            'photo' => 'nullable|image|max:8192'
-        ];
+    public function deleteProfile(AuthDeleteRequest $request)
+    {
+        $request->validated();
+        $request->user()->delete();
+    }
 
-        if($user->type == 'C')
+    public function block(Request $request, User $user)
+    {
+        $this->validate($request, ['blocked' => 'required|boolean']);
+
+        $user->blocked = $request->blocked;
+        $user->save();
+
+        return response()->json($user);
+    }
+
+    private function deletePhoto(User $user)
+    {
+        if(!is_null($user->photo_url))
         {
-            $validator_assocArr += [
-                'address' => 'required',
-                'phone' => 'required',
-                'nif' => 'nullable|numeric|digits:9'
-            ];
+            $path = 'public/fotos/'.$user->photo_url;
+            if(Storage::exists($path)) Storage::delete($path);
         }
+    }
 
-		return Validator::make($request->all(), $validator_assocArr);
-	}
+    private function savePhoto($photo)
+    {
+        $path = $photo->store('public/fotos');
+        return basename($path);
+    }
+
+    private function deleteAndSavePhoto($photo, User $user)
+    {
+        $this->deletePhoto($user);
+        return $this->savePhoto($photo);
+    }
 }

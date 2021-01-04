@@ -54,6 +54,15 @@
         <template #cell(__actions)="scope">
           <div class="text-nowrap text-right">
 
+            <!-- Block icon button -->
+            <b-link
+                v-if="blockClicked"
+                @click.prevent="blockClicked(scope.item, scope.index, $event)"
+            >
+              <i v-if="scope.item.blocked" class="fas fa-ban fa-lg text-secondary"/>
+              <i v-else class="fas fa-ban fa-lg text-danger"/>
+            </b-link>
+
             <!-- Edit icon button -->
             <b-link
               v-if="editClicked"
@@ -72,6 +81,10 @@
               <i class="fas fa-trash-alt fa-lg"></i>
             </b-link>
           </div>
+        </template>
+
+        <template v-for="slotName in Object.keys($scopedSlots)" v-slot:[slotName]="slotScope">
+            <slot :name="slotName" v-bind="slotScope"></slot>
         </template>
 
         <!-- User slot -->
@@ -110,6 +123,8 @@ export default Vue.extend({
     editClicked: Function,
     /// callback when row delete button is clicked
     deleteClicked: Function,
+
+    blockClicked: Function,
     // boolean for defining header action label
     noActionLabel: Boolean,
 

@@ -2,7 +2,7 @@
   <page-component>
     <div class="container">
       <div class="justify-content-center">
-        <searchable-table
+        <searchable-table v-if="isAuthenticated && authUser.type === userType"
           :items="items"
           :row-clicked="rowClicked"
           :filter-changed="filterChanged"
@@ -11,6 +11,13 @@
           :add-clicked="addClicked"
           :edit-clicked="editClicked"
           :delete-clicked="deleteClicked"
+        />
+        <searchable-table v-else
+          :items="items"
+          :row-clicked="rowClicked"
+          :filter-changed="filterChanged"
+          :page-changed="pageChanged"
+          :meta-total="total"
         />
       </div>
     </div>
@@ -31,6 +38,10 @@ import { AlertType, createAlert } from "../../utils/alert";
 
 import { Params, LaravelResponse } from "../../stores/api";
 import { AxiosPromise } from "axios";
+import { namespace } from "vuex-class";
+import { UserModel, UserType } from "../../models/user";
+
+const Auth = namespace("auth");
 
 @Component({
   components: {
@@ -67,6 +78,14 @@ export default class ProductListView extends Vue {
 
   filterText?: string = "";
   currentPage?: number | string;
+
+  @Auth.Getter
+  public isAuthenticated!: boolean;
+
+  @Auth.Getter
+  public authUser!: UserModel
+
+  userType: string = UserType.EMPLOYEE_MANAGER;
 
   data() {
     let obj = this;

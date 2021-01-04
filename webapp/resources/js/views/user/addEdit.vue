@@ -8,24 +8,7 @@
           placeholder="Enter email"
           v-model="form.email"
         />
-        <form-field
-          v-if="form.type == 'C'"
-          label="Address"
-          placeholder="Enter address"
-          v-model="form.address"
-        />
-        <form-field
-          v-if="form.type == 'C'"
-          label="Phone Number"
-          placeholder="Enter phone number"
-          v-model="form.phone"
-        />
-        <form-field
-          v-if="form.type == 'C'"
-          label="NIF"
-          placeholder="Enter NIF"
-          v-model="form.nif"
-        />
+        <form-searchable-select label="User type" placeholder="Select the user type" v-model="form.type" :options="types" />
         <div class="form-group">
           <label for="password">Password</label>
           <b-input
@@ -62,11 +45,12 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import { mapState, mapActions } from "vuex";
-import { AxiosPromise } from "axios";
+import Axios, { AxiosPromise } from "axios";
 
 import PageComponent from "../../components/Page.vue";
 import ItemEdit from "../../components/item/ItemAddEdit.vue";
 import FormField from "../../components/form/FormField.vue";
+import FormSearchableSelect from "../../components/form/FormSearchableSelect.vue";
 
 import { AlertType, createAlert } from "../../utils/alert";
 
@@ -76,6 +60,7 @@ import router from "../../router";
 import { UserModel, UserType } from "../../models/user";
 
 import { namespace } from "vuex-class";
+import { deSnakeCase } from "../../utils/string";
 const Auth = namespace("auth");
 
 @Component({
@@ -83,6 +68,7 @@ const Auth = namespace("auth");
     PageComponent,
     ItemEdit,
     FormField,
+    FormSearchableSelect,
   },
   computed: {
     passwordValid() {
@@ -90,6 +76,16 @@ const Auth = namespace("auth");
         ? null
         : (<any>this).password == (<any>this).passwordConfirmation;
     },
+
+    types: () => Object.entries(UserType)
+        .map(tuple => {
+            return {
+                value: tuple[1],
+                text: `${deSnakeCase(tuple[0])}`,
+            };
+        })
+        .filter(tuple => tuple.value != UserType.CUSTOMER),
+
     ...mapState({
       user: (state: any) => state.api.user,
       pending: (state: any) => state.api.pending,
@@ -121,6 +117,8 @@ export default class UserAddEditView extends Vue {
   user?: UserModel;
   form: UserModel = {};
 
+  error?: any;
+
   passwordValid?: boolean;
   password: string = "";
   passwordConfirmation: string = "";
@@ -150,11 +148,11 @@ export default class UserAddEditView extends Vue {
           // go back
           router.go(-1);
         })
-        .catch((err) => {
-          createAlert(
-            AlertType.Danger,
-            `Error on updating user ${this.user?.id}: ${err}`
-          );
+        .catch((request) => {
+          let errors = request.response.data.errors;
+          for (const error in errors) {
+              createAlert(AlertType.Danger, `Error editing user: ${error}: ${errors[error]}`);
+          }
         });
     } else {
       this.addUser({ data: this.form })
@@ -162,11 +160,15 @@ export default class UserAddEditView extends Vue {
           // go back
           router.go(-1);
         })
-        .catch((err) => {
-          createAlert(AlertType.Danger, `Error on adding user: ${err}`);
+        .catch((request) => {
+          let errors = request.response.data.errors;
+          for (const error in errors) {
+              createAlert(AlertType.Danger, `Error adding user: ${error}: ${errors[error]}`);
+          }
         });
     }
   }
+
   onReset(ev: Event) {
     ev.preventDefault();
     this.setEditFields();
@@ -179,30 +181,32 @@ export default class UserAddEditView extends Vue {
         : this.getUser({ params: { id: this.userId } })
       )
         .then(() => {
-          let optional =
-            this.user?.type == UserType.CUSTOMER
-              ? {
-                  address: this.user?.address,
-                  phone: this.user?.phone,
-                  nif: this.user?.nif,
-                }
-              : {};
+          if (this.authUser.type === UserType.EMPLOYEE_MANAGER && this.user?.type === UserType.CUSTOMER) {
+              router.go(-1);
+          }
+
           this.form = {
             id: this.user?.id,
             name: this.user?.name,
             email: this.user?.email,
             type: this.user?.type,
-            ...optional,
           };
 
           this.itemLoaded = true;
         })
-        .catch((err) => {
-          createAlert(
-            AlertType.Danger,
-            `Error on fetching user ${this.userId}: ${err}`
-          );
-        });
+        .catch((request) => {
+          router.push({ name: "list-users" })
+            .then(() => {
+                if (request.response.data.errors) {
+                    let errors = request.response.data.errors;
+                    for (const error in errors) {
+                        createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${error}: ${errors[error]}`);
+                    }
+                } else {
+                    createAlert(AlertType.Danger, `Error fetching user (${this.userId}): ${request.response.data.message}`);
+                }
+            });
+        })
     }
   }
 
