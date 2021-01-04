@@ -17,6 +17,7 @@ use App\Http\Requests\PhotoRequest;
 use App\Http\Requests\UserPhotoRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\UserDeleteRequest;
+use App\Http\Requests\AuthDeleteRequest;
 
 class UserController extends Controller
 {
@@ -129,6 +130,12 @@ class UserController extends Controller
     {
         $request->validated();
         $user->delete();
+    }
+
+    public function deleteProfile(AuthDeleteRequest $request)
+    {
+        $request->validated();
+        $request->user()->delete();
     }
 
     public function block(Request $request, User $user)
