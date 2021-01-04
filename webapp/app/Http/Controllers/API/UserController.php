@@ -13,6 +13,8 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\UserPostRequest;
 use App\Http\Requests\UserPutRequest;
+use App\Http\Requests\PhotoRequest;
+use App\Http\Requests\UserPhotoRequest;
 
 class UserController extends Controller
 {
@@ -90,40 +92,19 @@ class UserController extends Controller
 		return response()->json($user);
     }
 
-    public function photoProfile(Request $request)
+    public function photoProfile(PhotoRequest $request)
     {
-        return $this->photo($request, $request->user());
+        $request->validated();
+        $user = $request->user();
+        $user->photo_ur = $this->deleteAndSavePhoto($request->photo, $user);
+        $user->save();
     }
 
-    public function photo(Request $request, User $user)
+    public function photo(UserPhotoRequest $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'photo' => 'required|image|max:8192'
-        ]);
-
-        if($validator->fails()) {
-            return response()->json([
-                'status_code' => 400,
-                'message' => 'Bad request. Invalid data.',
-                'errors' => $validator->errors()
-            ], 400);
-        }
-
-        if(!is_null($user->photo_url))
-        {
-            $path = 'public/fotos/'.$user->photo_url;
-            if(Storage::exists($path))
-                Storage::delete($path);
-        }
-
-        $path = $request->photo->store('public/fotos');
-        $user->photo_url = basename($path);
+        $request->validated();
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
         $user->save();
-
-		return response()->json([
-            'status_code' => 200,
-            'message' => 'Upload successful'
-        ]);
     }
 
     public function photoDelete(User $user)
