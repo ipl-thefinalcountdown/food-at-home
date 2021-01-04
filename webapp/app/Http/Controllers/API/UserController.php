@@ -15,6 +15,7 @@ use App\Http\Requests\UserPostRequest;
 use App\Http\Requests\UserPutRequest;
 use App\Http\Requests\PhotoRequest;
 use App\Http\Requests\UserPhotoRequest;
+use App\Http\Requests\UserRequest;
 
 class UserController extends Controller
 {
@@ -107,27 +108,20 @@ class UserController extends Controller
         $user->save();
     }
 
-    public function photoDelete(User $user)
+    public function photoDelete(UserRequest $request, User $user)
     {
-        if(!is_null($user->photo_url))
-        {
-            $path = 'public/fotos/'.$user->photo_url;
-            if(Storage::exists($path))
-                Storage::delete($path);
-        }
-
+        $request->validated();
+        $this->deletePhoto($user->photo_url, $user);
         $user->photo_url = null;
         $user->save();
-
-		return response()->json([
-            'status_code' => 200,
-            'message' => 'Photo deleted!'
-        ]);
     }
 
     public function photoDeleteProfile(Request $request)
     {
-        $this->photoDelete($request->user());
+        $user = $request->user();
+        $this->deletePhoto($user->photo_url, $user);
+        $user->photo_url = null;
+        $user->save();
     }
 
     public function delete(Request $request, User $user)
@@ -179,6 +173,15 @@ class UserController extends Controller
 		return Validator::make($request->all(), $validator_assocArr);
     }
 
+    private function deletePhoto($photo, User $user)
+    {
+        if(!is_null($user->photo_url))
+        {
+            $path = 'public/fotos/'.$user->photo_url;
+            if(Storage::exists($path)) Storage::delete($path);
+        }
+    }
+
     private function savePhoto($photo)
     {
         $path = $photo->store('public/fotos');
@@ -187,12 +190,7 @@ class UserController extends Controller
 
     private function deleteAndSavePhoto($photo, User $user)
     {
-        if(!is_null($user->photo_url))
-        {
-            $path = 'public/fotos/'.$user->photo_url;
-            if(Storage::exists($path)) Storage::delete($path);
-        }
-
+        deletePhoto($photo, $user);
         return savePhoto($photo);
     }
 }
