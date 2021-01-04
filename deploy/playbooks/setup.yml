@@ -1,0 +1,10 @@
+---
+
+- name: setup food-at-home server
+  hosts: gcp
+  roles:
+    - { role: certbot, tags: ['certbot'] }
+    - { role: mariadb, tags: ['mariadb'] }
+    - { role: php_fpm, tags: ['php_fpm'] }
+    - { role: nginx, tags: ['nginx'] }
+    - { role: webapp, tags: ['webapp'] }
