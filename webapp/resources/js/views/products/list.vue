@@ -5,7 +5,7 @@
         <searchable-table
           :items="items"
           :row-clicked="rowClicked"
-          :cart-clicked="cartClicked"
+          :cart-clicked="(isAuthenticated && authUser.type == 'C') ? cartClicked : undefined"
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
@@ -35,6 +35,7 @@ import SearchableTable from "../../components/SearchableTable.vue";
 
 import router from "../../router";
 import { ProductModel } from "../../models/product";
+import { UserModel } from "../../models/user";
 import { AlertType, createAlert } from "../../utils/alert";
 
 import { Params, LaravelResponse } from "../../stores/api";
@@ -42,6 +43,7 @@ import { AxiosPromise } from "axios";
 
 import { namespace } from "vuex-class";
 const Cart = namespace("cart");
+const Auth = namespace("auth");
 
 @Component({
   components: {
@@ -75,6 +77,12 @@ export default class ProductListView extends Vue {
   getProducts!: (obj: Params) => void;
   deleteProduct!: (obj: Params) => AxiosPromise;
   putProduct!: (obj: Params) => void;
+
+  		@Auth.Getter
+    private isAuthenticated!: boolean;
+
+    @Auth.Getter
+    public authUser!: UserModel;
 
   @Cart.Action
   public addCartProductAction!: (product: ProductModel) => void;
