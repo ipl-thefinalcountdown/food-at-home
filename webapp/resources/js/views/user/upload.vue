@@ -65,7 +65,7 @@ export default class UserUploadPhotoView extends Vue {
 
     onSubmit() {
         let formData = new FormData();
-        formData.append('photo', this.file);
+        formData.append('photo_url', this.file);
         axios({
             url: (this.$route.params.id)
                 ? `users/${this.$route.params.id}/photo`
@@ -87,22 +87,23 @@ export default class UserUploadPhotoView extends Vue {
     }
 
     mounted() {
-        this.getUser({ params: { id: this.$route.params.id } }).then((result) => {
-            if (this.authUser?.type == UserType.EMPLOYEE_MANAGER && result.data?.type == UserType.CUSTOMER)
-                router.go(-1);
-        }).catch((request) => {
-          router.push({ name: "list-users" })
-            .then(() => {
-              if (request.response.data.errors) {
-                let errors = request.response.data.errors;
-                  for (const error in errors) {
-                    createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${error}: ${errors[error]}`);
-                  }
-                } else {
-                  createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${request.response.data.message}`);
-              }
-          });
-        })
+        if (this.$route.params.id)
+            this.getUser({ params: { id: this.$route.params.id } }).then((result) => {
+                if (this.authUser?.type == UserType.EMPLOYEE_MANAGER && result.data?.type == UserType.CUSTOMER)
+                    router.go(-1);
+            }).catch((request) => {
+            router.push({ name: "list-users" })
+                .then(() => {
+                if (request.response.data.errors) {
+                    let errors = request.response.data.errors;
+                    for (const error in errors) {
+                        createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${error}: ${errors[error]}`);
+                    }
+                    } else {
+                    createAlert(AlertType.Danger, `Error fetching user (${this.$route.params.id}): ${request.response.data.message}`);
+                    }
+                });
+            })
     }
 }
 </script>
