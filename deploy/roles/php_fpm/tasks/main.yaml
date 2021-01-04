@@ -6,6 +6,9 @@
       - php-fpm
       - php-gd
       - php-pgsql
+      - php-xml
+      - php-mbstring
+      - php-mysql
     state: present
 
 - name: install php-fpm units

@@ -4,6 +4,8 @@ php_extensions:
   - curl
   - zip
   - ext-dom
+  - pdo_mysql
+  - pdo
 
 zend_extensions:
   - opcache
