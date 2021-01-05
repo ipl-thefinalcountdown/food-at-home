@@ -20,7 +20,6 @@
         </template>
 
         </searchable-table>
-        />
         <searchable-table v-else
           :items="items"
           :row-clicked="rowClicked"
