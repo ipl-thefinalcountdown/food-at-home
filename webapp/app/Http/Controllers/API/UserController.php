@@ -53,7 +53,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->password);
 
         if ($request->has('photo'))
-            $user->photo = savePhoto($request->photo);
+            $user->photo = savePhoto($request->photo_url);
 
         $user->save();
 
@@ -84,7 +84,7 @@ class UserController extends Controller
 			$user->password = Hash::make($request->password);
 
 		if ($request->hasFile('photo'))
-            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
 
         if ($request->user()->type == 'C')
         {
@@ -106,7 +106,7 @@ class UserController extends Controller
 			$user->password = Hash::make($request->password);
 
 		if ($request->hasFile('photo'))
-            $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
+            $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
 
         $user->save();
 		return response()->json($user);
@@ -116,14 +116,14 @@ class UserController extends Controller
     {
         $request->validated();
         $user = $request->user();
-        $user->photo_ur = $this->deleteAndSavePhoto($request->photo, $user);
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
         $user->save();
     }
 
     public function photo(UserPhotoRequest $request, User $user)
     {
         $request->validated();
-        $user->photo_url = $this->deleteAndSavePhoto($request->photo, $user);
+        $user->photo_url = $this->deleteAndSavePhoto($request->photo_url, $user);
         $user->save();
     }
 
@@ -166,7 +166,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    private function deletePhoto($photo, User $user)
+    private function deletePhoto(User $user)
     {
         if(!is_null($user->photo_url))
         {
