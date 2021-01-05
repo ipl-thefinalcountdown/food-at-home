@@ -32,7 +32,7 @@ class AuthPutRequest extends FormRequest
                 Rule::unique('users')->ignoreModel($this->user())
             ],
             'password' => 'sometimes|min:3',
-            'photo' => 'sometimes|nullable|image|max:8192',
+            'photo_url' => 'sometimes|nullable|image|max:8192',
             'address' => 'sometimes|string',
             'nif' => 'sometimes|nullable|digits:9',
             'phone' => 'sometimes|max:20|min:9',

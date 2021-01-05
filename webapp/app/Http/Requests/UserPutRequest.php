@@ -27,7 +27,7 @@ class UserPutRequest extends FormRequest
                 Rule::unique('users')->ignoreModel($this->user)
             ],
             'password' => 'sometimes|min:3',
-            'photo' => 'sometimes|image|max:8192',
+            'photo_url' => 'sometimes|image|max:8192',
             'type' => 'sometimes|in:EC,ED,EM',
         ];
     }
