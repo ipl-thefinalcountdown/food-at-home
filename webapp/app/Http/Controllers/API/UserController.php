@@ -130,7 +130,7 @@ class UserController extends Controller
     public function photoDelete(UserRequest $request, User $user)
     {
         $request->validated();
-        $this->deletePhoto($user->photo_url, $user);
+        $this->deletePhoto($user);
         $user->photo_url = null;
         $user->save();
     }
@@ -138,7 +138,7 @@ class UserController extends Controller
     public function photoDeleteProfile(Request $request)
     {
         $user = $request->user();
-        $this->deletePhoto($user->photo_url, $user);
+        $this->deletePhoto($user);
         $user->photo_url = null;
         $user->save();
     }
@@ -183,7 +183,7 @@ class UserController extends Controller
 
     private function deleteAndSavePhoto($photo, User $user)
     {
-        $this->deletePhoto($photo, $user);
+        $this->deletePhoto($user);
         return $this->savePhoto($photo);
     }
 }

@@ -110,7 +110,8 @@ const Auth = namespace("auth");
         "getUser",
         "deleteProfilePhoto",
         "deleteUserPhoto",
-        "deleteProfile"
+        "deleteProfile",
+        "deleteUser",
       ]),
   },
   watch: {
@@ -154,13 +155,17 @@ export default class ProfileView extends Vue {
   deleteClicked() {
     if (this.isProfile)
       this.makeAuthDelete().then(() => {
-          router.push('/');
+          router.push('/').then(() => {
+                createAlert(AlertType.Success, `Account deleted.`);
+          });
       });
     else
       this.deleteUser({ params: { id: this.userId } })
           .then(() => {
             // success deletion
-            createAlert(AlertType.Success, `User ${this.items[0].name} deleted.`);
+            router.push({ name: "list-users" }).then(() => {
+                createAlert(AlertType.Success, `User ${this.items[0].name} deleted.`);
+            })
           })
           .catch((request) => {
             let errors = request.response.data.errors;
