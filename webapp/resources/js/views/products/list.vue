@@ -5,7 +5,6 @@
         <searchable-table v-if="isAuthenticated && authUser.type === userType"
           :items="items"
           :row-clicked="rowClicked"
-          :cart-clicked="(isAuthenticated && authUser.type == 'C') ? cartClicked : undefined"
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
           :meta-total="total"
@@ -22,6 +21,7 @@
         </searchable-table>
         <searchable-table v-else
           :items="items"
+          :cart-clicked="(isAuthenticated && authUser.type == 'C') ? cartClicked : undefined"
           :row-clicked="rowClicked"
           :filter-changed="filterChanged"
           :page-changed="pageChanged"
